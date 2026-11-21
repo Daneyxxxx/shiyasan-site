@@ -1,0 +1,117 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#15221e"><link rel="icon" href="icon.png"><meta name="description" content="Shiya-san is a Discord bot for Truth or Lie and the Cup Game, with friendly rooms and a ranked ladder.">
+<title>Shiya-san | Truth or Lie and Cup Game bot</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><a class="brand" href="index.html"><img class="seal" src="icon.png" alt="" width="36" height="36">Shiya-san</a>
+<nav><a href="index.html#play">How to play</a><a href="index.html#ranks">Ranks</a><a href="index.html#boards">Leaderboards</a><a href="index.html#players">Players</a><a href="index.html#rules">Rules</a><a class="btn sm" href="https://discord.com/oauth2/authorize?client_id=1524010081409306767&permissions=326417599488&integration_type=0&scope=bot+applications.commands">Invite</a></nav></header>
+
+<main class="wrap"><div class="hero"><div>
+<h1>Spot the lie. Find the cup.</h1>
+<p class="lead">Shiya-san brings Truth or Lie and the Cup Game to your Discord server. Play friendly rooms for ChuPoints, or climb the ranked ladder against players from other servers.</p>
+<div class="cta"><a class="btn" href="https://discord.com/oauth2/authorize?client_id=1524010081409306767&permissions=326417599488&integration_type=0&scope=bot+applications.commands">Invite Shiya-san</a><a class="btn ghost" href="#play">How to play</a></div>
+<span class="pill wait" id="st"><i></i><span id="stt">Checking status…</span></span></div>
+<figure class="portrait"><img src="shiya.webp" width="720" height="900" alt="Shiya-san, a smiling anime girl resting her cheek on her hand in a classroom" fetchpriority="high"><figcaption>Class is in session</figcaption><span class="hrt h1">♡</span><span class="hrt h2">♡</span><span class="hrt h3">♡</span></figure></div>
+
+<section id="demo"><div class="two mid"><div><h2>Try a round</h2><p class="lead">Watch the ball, follow the cups, then pick one. It’s a tiny taste of the Cup Game, minus the ChuPoints.</p></div><div class="board"><small>Try the cup game right here</small>
+<div class="cups">
+<button class="slot" aria-label="Cup 1"><span class="ball"></span><span class="cup"></span></button>
+<button class="slot" aria-label="Cup 2"><span class="ball"></span><span class="cup"></span></button>
+<button class="slot" aria-label="Cup 3"><span class="ball"></span><span class="cup"></span></button></div>
+<div class="ledge"></div><p id="msg">Press start, watch the ball, then pick a cup.</p>
+<button class="btn" id="go">Start round</button><p><small id="best">Best streak 0</small></p></div></div></section>
+
+<section id="play"><h2>How to play</h2>
+<ol class="steps">
+<li><b>Invite the bot, then type <code>/how</code>.</b> It lists every command. New players start with 40,000 ChuPoints and can claim 10,000 every day.</li>
+<li><b>Open a room.</b> Use <code>/torlclassic</code> or <code>/cupgame</code> to bet ChuPoints (500 minimum). Use <code>/torlranked</code> or <code>/cupgameranked</code> for 7 ranked rounds with no bets. Want opponents from other servers? Try <code>/torlcrossranked</code> or <code>/cupgamecrossranked</code>.</li>
+<li><b>Play your role.</b> Truth or Lie has a Teller and a Guesser. The Cup Game has a Hider and a Guesser. When it’s your turn you have 50 seconds to act.</li>
+<li><b>Earn stars and spend your winnings.</b> Check <code>/profile</code>, <code>/rankleaderboard</code> and <code>/shop</code>.</li></ol>
+<div class="cmds">
+<div><code>/torlclassic</code><span>Truth or Lie with a bet</span></div><div><code>/cupgame</code><span>Cup Game with a bet</span></div>
+<div><code>/torlranked</code><span>7 ranked rounds, no bets</span></div><div><code>/torlcrossranked</code><span>Ranked across servers</span></div>
+<div><code>/customroom</code><span>Cross-server custom room</span></div><div><code>/whosthespy</code><span>Spy game for 4 to 12 players</span></div>
+<div><code>/profile</code><span>Rank, stats and history</span></div><div><code>/bank</code><span>Wallet and bank</span></div>
+<div><code>/rules</code><span>The bot’s rules</span></div><div><code>/reportmatch</code><span>Report an opponent</span></div></div></section>
+
+<section id="ranks"><h2>The rank ladder</h2>
+<ol class="ladder"><li><b>Connector</b>I to V. No star loss.</li><li><b>Starter</b>I to V. No star loss.</li><li><b>Logic Newbie</b>I to V. Your floor.</li><li><b>Striker</b>I to V.</li><li><b>Biggy Placement</b>10 stars to place.</li><li><b>Multi Stars</b>Biggy, Senior, Logic Master, Logic Senior, Overall Master.</li></ol>
+<dl class="facts"><div><dt>Protection</dt><dd>Every rank-up gives a protection point (hold up to 3). One absorbs a lost star.</dd></div>
+<div><dt>Seasons</dt><dd>Each season lasts 120 days, then ranks reset.</dd></div></dl></section>
+
+<section id="boards"><h2>Leaderboards</h2>
+<div class="tabs"><button class="tab on" data-t="rank">Rank</button><button class="tab" data-t="points">ChuPoints</button><button class="tab" data-t="perf">Performance</button><button class="tab" data-t="score">Ranked score</button></div>
+<ol class="lb" id="lb"><li class="muted">Loading…</li></ol></section>
+<section id="players"><h2>Find a player</h2>
+<form class="find" id="find"><input id="q" type="search" placeholder="Player name or ID" autocomplete="off" aria-label="Player name or ID" minlength="2" required><button class="btn" type="submit">Search</button></form>
+<div id="res" aria-live="polite"></div></section>
+
+<section id="rules"><div class="two"><div><h2>Rules</h2><ul class="rules">
+<li>Play fair. No cheating, scripts or extra accounts.</li><li>Be kind in cross-server chats. Report problems with <code>/reportmatch</code> within 6 hours of the match.</li>
+<li>Don’t abuse bugs. Tell Mitsuka instead.</li><li>ChuPoints are for fun. They have no real-world value and can’t be sold.</li>
+<li>Idle rooms close after 5 minutes.</li><li>Admins can restrict or reset accounts that break these rules.</li></ul></div>
+<div><h2>Bot info</h2><dl class="facts"><div><dt>Made by</dt><dd>Mitsuka (@youwillknowme_itsjustmichukadara)</dd></div>
+<div><dt>Status</dt><dd>Shown at the top of this page. Leaderboards and search refresh every few minutes.</dd></div>
+<div><dt>Needs</dt><dd>Send Messages, Embed Links, and thread permissions so it can run rooms.</dd></div></dl>
+<details><summary>Links for the Developer Portal</summary>
+<p><b>Terms of Service URL</b><span data-p="/terms.html"></span></p><p><b>Privacy Policy URL</b><span data-p="/privacy.html"></span></p>
+<p>Linked Roles and Interactions Endpoint need a server, so leave them empty.</p></details></div></div></section><section class="end"><img src="icon.png" alt="" width="96" height="96"><h2>Ready for your first round?</h2><a class="btn" href="https://discord.com/oauth2/authorize?client_id=1524010081409306767&permissions=326417599488&integration_type=0&scope=bot+applications.commands">Invite Shiya-san</a></section></main>
+<script src="config.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+document.querySelectorAll("[data-p]").forEach(e=>e.textContent=new URL(e.dataset.p.replace(/^\//,""),location.href).href);
+const C=Object.assign({statusUrl:"",widgetGuildId:"",botName:"Shiya-san"},window.SHIYA||{});
+const SAME=C.apiUrl==="same",A=SAME?"":(C.apiUrl||"").replace(/\/$/,""),ON=SAME||!!A||!!C.static;
+async function st(){const p=$("#st"),t=$("#stt"),set=(c,x)=>{p.className="pill "+c;t.textContent=x};
+try{if(C.static){const d=await jget(C.static+"/status.json"),fresh=d.online&&(Date.now()/1000-d.ts)<(C.maxAge||900);set(fresh?"on":"off",fresh?"Online, "+d.ping+" ms ping, "+d.servers+" servers":"Offline");return}const SU=C.statusUrl||(ON?A+"/api/status":"");if(SU){const d=await(await fetch(SU,{cache:"no-store"})).json();
+set(d.online?"on":"wait",d.online?"Online, "+d.ping+" ms ping, "+d.servers+" servers":"Starting up…");return}
+if(C.widgetGuildId){const d=await(await fetch("https://discord.com/api/guilds/"+C.widgetGuildId+"/widget.json",{cache:"no-store"})).json();
+if(!d.members){set("wait","Turn on Server Widget to show status");return}
+const n=C.botName.toLowerCase(),on=d.members.some(x=>(x.username||"").toLowerCase().includes(n));
+if(!on&&d.presence_count>d.members.length){set("wait","Status unavailable");return}
+set(on?"on":"off",on?"Online":"Offline");return}
+set("wait","Status setup needed: add Server ID in config.js")}catch(e){set("off","Offline")}}st();setInterval(st,15000);
+(()=>{const W=100,sl=[...document.querySelectorAll(".slot")],msg=$("#msg"),go=$("#go"),R=()=>Math.floor(Math.random()*3);
+let pos=[0,1,2],ball=0,ph="idle",streak=0,best=0;
+const place=()=>sl.forEach((s,i)=>s.style.transform="translateX("+pos[i]*W+"px)"),lift=(i,u)=>sl[i].classList.toggle("up",u),zz=ms=>new Promise(r=>setTimeout(r,ms));place();
+go.onclick=async()=>{if(ph!=="idle")return;ph="busy";go.disabled=true;sl.forEach((s,i)=>{lift(i,false);s.classList.remove("has")});
+ball=R();sl[ball].classList.add("has");msg.textContent="Watch the ball…";await zz(300);lift(ball,true);await zz(1000);lift(ball,false);await zz(500);msg.textContent="Shuffling…";
+for(let n=0;n<7;n++){const a=R(),b=(a+1+Math.floor(Math.random()*2))%3;[pos[a],pos[b]]=[pos[b],pos[a]];place();await zz(420)}
+ph="pick";msg.textContent="Which cup hides the ball?"};
+sl.forEach((s,i)=>s.onclick=()=>{if(ph!=="pick")return;ph="idle";lift(i,true);const ok=i===ball;if(!ok)lift(ball,true);
+streak=ok?streak+1:0;best=Math.max(best,streak);msg.textContent=ok?"Found it! Streak: "+streak:"Not that one. Streak reset.";
+$("#best").textContent="Best streak "+best;go.disabled=false;go.textContent="Play again"})})();
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e};
+async function jget(u){const r=await fetch(u+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json()}
+let PL=null;
+async function find(q){q=q.trim().toLowerCase().slice(0,40);if(q.length<2)return{results:[]};
+PL=PL||(await jget(C.static+"/players.json")).players;
+let h="";if(/^\d{15,22}$/.test(q)&&window.crypto&&crypto.subtle){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(q));h=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("").slice(0,16)}
+const ex=[],pt=[];for(const x of PL){const n=String(x.name||"").toLowerCase();if((h&&x.idh===h)||q===String(x.game_id||"").toLowerCase()||q===n)ex.push(x);else if(n.includes(q))pt.push(x)}
+return{results:ex.concat(pt).slice(0,8)}}
+async function api(p){if(C.static){const m=p.match(/^\/api\/leaderboard\?type=(\w+)/);if(m)return jget(C.static+"/lb-"+m[1]+".json");
+const s=p.match(/^\/api\/player\?q=(.*)$/);if(s)return find(decodeURIComponent(s[1]));throw new Error("bad request")}
+const r=await fetch(A+p,{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.json()}
+const off="Not connected yet. The site owner still needs to add the bot’s API address in config.js.";
+async function board(t){const o=$("#lb");o.replaceChildren(el("li","muted","Loading…"));
+if(!ON){o.replaceChildren(el("li","muted",off));return}
+try{const d=await api("/api/leaderboard?type="+t);o.replaceChildren(...(d.rows.length?d.rows.map((r,i)=>{const li=el("li",i<3?"top":"");li.append(el("b","pos","#"+(i+1)),el("span","nm",r.name),el("span","vl",r.value),el("small","sb",r.sub));return li}):[el("li","muted","No players here yet.")]))}
+catch(e){o.replaceChildren(el("li","muted","Couldn’t load the leaderboard. Try again soon."))}}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===b));board(b.dataset.t)});board("rank");
+function show(p){const r=$("#res"),c=el("article","pcard"),h=el("div","ph");let a;
+if(p.avatar){a=el("img","av");a.src=p.avatar;a.alt=""}else a=el("span","av",(p.name||"?")[0].toUpperCase());
+const w=el("div");w.append(el("h3","",p.name),el("span","pill",p.rank+", "+p.stars+" stars"));h.append(a,w);c.append(h);
+const g=el("dl","stats");[["Games",p.games],["Wins",p.wins],["Win rate",p.winrate+"%"],["Ranked games",p.ranked],["ChuPoints",Number(p.points).toLocaleString()],["XP",p.xp],["Performance",p.perf],["Ranked score",Number(p.score).toLocaleString()],["Best rank",p.best],["Game ID",p.game_id||"-"]].forEach(([k,v])=>{const d=el("div");d.append(el("dt","",k),el("dd","",String(v)));g.append(d)});c.append(g);
+if(p.recent&&p.recent.length){const l=el("ul","recent");p.recent.forEach(x=>l.append(el("li",x.res.toLowerCase(),x.res+", "+x.mode+", "+x.score)));c.append(el("h4","","Last games"),l)}
+r.replaceChildren(...(r._chips||[]),c)}
+$("#find").onsubmit=async e=>{e.preventDefault();const r=$("#res"),q=$("#q").value.trim();
+if(!ON){r.replaceChildren(el("p","muted",off));return}
+r.replaceChildren(el("p","muted","Searching…"));
+try{const d=await api("/api/player?q="+encodeURIComponent(q));
+if(!d.results.length){r.replaceChildren(el("p","muted","No player found. Check the spelling or try their ID."));return}
+r._chips=[];if(d.results.length>1){const w=el("div","chips");d.results.forEach(p=>{const b=el("button","chip",p.name);b.type="button";b.onclick=()=>show(p);w.append(b)});r._chips=[w]}
+show(d.results[0])}catch(err){r.replaceChildren(el("p","muted","Search isn’t available right now."))}};
+if("IntersectionObserver"in window&&!matchMedia("(prefers-reduced-motion:reduce)").matches){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll("section").forEach(s=>{s.classList.add("rv");io.observe(s)})}
+</script>
+<footer><div class="wrap"><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a>
+<span>Made by Mitsuka. Not fully human coded, so expect the odd bug.</span></div></footer></body></html>
