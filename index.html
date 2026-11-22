@@ -91,7 +91,7 @@ async function jget(u){const r=await fetch(u+"?t="+Date.now(),{cache:"no-store"}
 const nf=n=>Number(n||0).toLocaleString(),pos=x=>x?"#"+x:"–",ago=t=>{const s=Math.max(0,Date.now()/1000-t);return s<3600?Math.max(1,Math.round(s/60))+"m ago":s<86400?Math.round(s/3600)+"h ago":Math.round(s/86400)+"d ago"};
 const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const off="Not connected yet. The site owner still needs to add the data folder in config.js.";
-let PL=null,PF={},CL=[],memV="";const LK=new Set(lsGet("shiya_liked",[]));
+let PL=null,PF={},CL=[],memV="";const LK=new Set(lsGet("shiya_liked",[])),LB=(o=>o&&typeof o==="object"&&!Array.isArray(o)?o:{})(lsGet("shiya_likebase",{}));
 const players=async()=>PL=PL||(await jget(C.static+"/players.json")).players;
 async function profile(h){const k=h[0];PF[k]=PF[k]||jget(C.static+"/pf/"+k+".json").catch(e=>{delete PF[k];throw e});return(await PF[k])[h]}
 async function find(q){q=q.trim().toLowerCase().slice(0,40);if(q.length<2)return[];const L=await players();let h="";
@@ -139,10 +139,10 @@ if(typeof p.likes==="number")kids.push(likeRow(p,h));box.replaceChildren(...kids
 async function sendLike(h){let v=lsGet("shiya_voter","");if(!/^[0-9a-f]{16}$/.test(v)){v=memV||[...crypto.getRandomValues(new Uint8Array(8))].map(x=>x.toString(16).padStart(2,"0")).join("");memV=v;lsSet("shiya_voter",v)}
 const fd=new FormData();fd.append("payload_json",JSON.stringify({content:"PLIKE|"+h+"|"+v,username:"Shiya Web",allowed_mentions:{parse:[]}}));await fetch(HOOK,{method:"POST",body:fd,mode:"no-cors"})}
 function burst(r){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;for(let i=0;i<7;i++){const s=el("span","fh","♥");s.style.cssText="right:"+(18+Math.random()*70)+"px;bottom:26px;--dx:"+Math.round(Math.random()*70-35)+"px;animation-delay:"+i*60+"ms";r.append(s);setTimeout(()=>s.remove(),1300)}}
-function likeRow(p,h){const r=el("div","likes"),c=el("span"),n=el("b","",nf(p.likes));c.append(el("small","","Likes "),n);r.append(c);
+function likeRow(p,h){if(LK.has(h)&&typeof LB[h]==="number")p.likes=Math.max(p.likes,LB[h]+1);const r=el("div","likes"),c=el("span"),n=el("b","",nf(p.likes));c.append(el("small","","Likes "),n);r.append(c);
 if(HOOK){const b=el("button","lkbtn");b.type="button";const paint=()=>{const d=LK.has(h);b.className="lkbtn"+(d?" done":"");b.textContent=d?"♥ Liked":"♡ Like";b.disabled=d};paint();
-b.onclick=()=>{if(LK.has(h))return;LK.add(h);lsSet("shiya_liked",[...LK]);p.likes++;n.textContent=nf(p.likes);paint();burst(r);
-sendLike(h).catch(()=>{LK.delete(h);lsSet("shiya_liked",[...LK]);p.likes--;n.textContent=nf(p.likes);paint()})};r.append(b)}return r}
+b.onclick=()=>{if(LK.has(h))return;LK.add(h);lsSet("shiya_liked",[...LK]);LB[h]=p.likes;lsSet("shiya_likebase",LB);p.likes++;n.textContent=nf(p.likes);paint();burst(r);
+sendLike(h).catch(()=>{LK.delete(h);delete LB[h];lsSet("shiya_liked",[...LK]);lsSet("shiya_likebase",LB);p.likes--;n.textContent=nf(p.likes);paint()})};r.append(b)}return r}
 /* changelogs: the same text as /changelogs in Discord, with search */
 function md(s){const f=document.createDocumentFragment();s.split(/(\*\*[^*]+\*\*|`[^`]+`)/).forEach(t=>{if(!t)return;
 if(t.length>4&&t.startsWith("**")&&t.endsWith("**"))f.append(el("b","",t.slice(2,-2)));else if(t.length>2&&t[0]==="`"&&t.endsWith("`"))f.append(el("code","",t.slice(1,-1)));else f.append(document.createTextNode(t))});return f}
