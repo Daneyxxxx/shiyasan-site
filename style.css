@@ -65,3 +65,35 @@ html,body{overflow-x:clip}.seal{object-fit:cover;background:var(--pink)}
 .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:0}.stats div{background:#0e1815;border-radius:12px;padding:10px 14px}.stats dt{color:var(--dim);font-size:13px}.stats dd{margin:0;font-weight:700;font-size:18px;overflow-wrap:anywhere}
 .pcard h4{margin:20px 0 8px}.recent{list-style:none;margin:0;padding:0;display:grid;gap:6px;color:var(--dim)}.recent .win{color:var(--mint)}.recent .loss{color:var(--red)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.chip{padding:6px 14px;border-radius:999px;border:1px solid #4a6258;background:none;color:var(--chalk);cursor:pointer;font:500 14px Figtree,sans-serif}.chip:hover{border-color:var(--pink)}
+
+/* v7: top 10 boards, player cards, player window, likes, changelogs */
+.note{color:var(--dim);margin:-8px 0 16px;font-size:15px}
+.lb .lk{background:none;border:0;padding:0;margin:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer;overflow-wrap:anywhere;text-decoration:underline dotted #6d8077;text-underline-offset:4px}.lb .lk:hover{color:var(--pink)}
+.plist{display:grid;gap:14px;max-width:640px}
+.pc{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;text-align:left;cursor:pointer;color:var(--chalk);background:var(--board2);border:3px dashed #5b7268;border-radius:20px;padding:16px 20px;font:inherit;position:relative;overflow:hidden;transition:transform .25s,border-color .25s}
+.pc:hover,.pc:focus-visible{transform:translateY(-2px) rotate(-.4deg);border-color:var(--pink)}
+.pc-main{display:grid;gap:3px;min-width:0}.pc-name{font:26px/1.15 "Bagel Fat One",Figtree,sans-serif;overflow-wrap:anywhere;margin-bottom:2px}
+.pc-line small{color:var(--dim);font-size:13px;margin-right:8px}.pc-line em{font-style:normal;font-weight:700;color:var(--mint)}
+.pc-rank{font:64px/1 "Bagel Fat One",Figtree,sans-serif;color:var(--pink);opacity:.28;flex:none;text-align:right}.pc-rank.sm{font-size:42px}
+dialog#pw{border:0;padding:0;background:none;color:var(--chalk);width:min(560px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:visible;margin:auto}
+dialog#pw::backdrop{background:#050b09cc;backdrop-filter:blur(3px)}
+.pw{position:relative;background:var(--board2);border:3px dashed #5b7268;border-radius:24px;padding:24px 20px 22px;max-height:calc(100dvh - 24px);overflow:auto;box-shadow:0 30px 80px #000a;animation:pop .3s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{transform:translateY(14px) scale(.96);opacity:0}}
+body:has(dialog[open]){overflow:hidden}
+.pw .x{position:absolute;top:10px;right:12px;width:38px;height:38px;border-radius:50%;border:2px dashed #6d8077;background:none;color:var(--chalk);font-size:16px;cursor:pointer}.pw .x:hover{border-color:var(--pink)}
+.pw-head{display:flex;gap:16px;align-items:center;margin:0 40px 16px 0}.pw-head .av{width:80px;height:80px;border:4px solid var(--pink)}
+.pw-head h3{margin:0 0 6px;font:28px/1.1 "Bagel Fat One",Figtree,sans-serif;overflow-wrap:anywhere}
+.tag{display:inline-block;padding:2px 12px;margin:0 6px 4px 0;border-radius:999px;background:var(--pink);color:#3a1d27;font-weight:700;font-size:13px}.tag.new{margin:0 0 0 4px}
+.pw h4{margin:18px 0 8px}.pw .muted{margin:0}
+.bds{display:flex;flex-wrap:wrap;gap:8px}.bd{width:42px;height:42px;display:grid;place-items:center;background:#0e1815;border-radius:50%;font-size:22px}
+.likes{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;padding:12px 16px;border-radius:16px;background:#0e1815;border:2px dashed #5b7268;position:relative}
+.likes small{color:var(--dim);font-size:15px}.likes b{font:26px "Bagel Fat One",Figtree,sans-serif;color:var(--pink)}
+.lkbtn{padding:10px 20px;border-radius:999px;border:2px solid var(--pink);background:var(--pink);color:#3a1d27;font:700 16px Figtree,sans-serif;cursor:pointer;transition:transform .15s}.lkbtn:active{transform:scale(.9)}.lkbtn.done{background:none;color:var(--pink);cursor:default}
+.fh{position:absolute;pointer-events:none;color:var(--pink);font-size:18px;animation:fh 1s ease-out forwards}
+@keyframes fh{from{opacity:1;transform:translate(0,0) scale(.6)}to{opacity:0;transform:translate(var(--dx),-80px) scale(1.4)}}
+.clq{max-width:560px}
+details.cl-e{margin:0 0 12px;max-width:760px;background:var(--board2);border:2px dashed #4a6258;border-radius:18px;padding:0}
+.cl-e summary{display:flex;align-items:center;gap:10px;padding:14px 18px;list-style:none}.cl-e summary::-webkit-details-marker{display:none}
+.cl-e summary b{font:20px "Bagel Fat One",Figtree,sans-serif;font-weight:400}.cl-e summary small{color:var(--dim)}.cl-e summary:after{content:"＋";margin-left:auto;color:var(--pink)}.cl-e[open] summary:after{content:"－"}
+.cl-body{padding:0 18px 16px}.cl-body h4{margin:14px 0 6px}.cl-list{margin:0;padding-left:20px;color:#d9d6cc}.cl-list li{margin:4px 0}
+@media(max-width:480px){.pc{padding:14px 16px}.pc-name{font-size:23px}.pc-rank{font-size:52px}.pw-head .av{width:64px;height:64px}.pw-head h3{font-size:24px}}
