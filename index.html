@@ -1,11 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.discordapp.com https://media.discordapp.net; connect-src 'self' https://discord.com https://api.github.com; base-uri 'none'; form-action 'self'; object-src 'none'"><meta name="referrer" content="no-referrer"><meta name="theme-color" content="#15221e"><link rel="icon" href="icon.png"><meta name="description" content="Shiya-san is a Discord bot for Truth or Lie and the Cup Game, with friendly rooms and a ranked ladder.">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.discordapp.com https://media.discordapp.net; connect-src 'self' https://discord.com https://api.github.com https://daneyxxxx.github.io; base-uri 'none'; form-action 'self'; object-src 'none'"><meta name="referrer" content="no-referrer"><meta name="theme-color" content="#15221e"><link rel="icon" href="icon.png"><meta name="description" content="Shiya-san is a Discord bot for Truth or Lie and the Cup Game, with friendly rooms and a ranked ladder.">
 <title>Shiya-san | Truth or Lie and Cup Game bot</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css"></head><body>
-<header class="top"><a class="brand" href="index.html"><img class="seal" src="icon.png" alt="" width="36" height="36">Shiya-san</a>
-<nav><a href="index.html#play">How to play</a><a href="index.html#ranks">Ranks</a><a href="index.html#boards">Leaderboards</a><a href="index.html#players">Players</a><a href="index.html#changelog">Changelogs</a><a href="index.html#rules">Rules</a><a class="btn sm" href="https://discord.com/oauth2/authorize?client_id=1524010081409306767&permissions=326417599488&integration_type=0&scope=bot+applications.commands">Invite</a><button class="btn sm dc" id="login" type="button">Log in</button></nav></header>
-
+<header class="top"><a class="brand" href="index.html"><img class="seal" src="icon.png" alt="" width="36" height="36">Shiya-san</a><div class="tools"><a class="btn sm" href="https://discord.com/oauth2/authorize?client_id=1524010081409306767&permissions=326417599488&integration_type=0&scope=bot+applications.commands">Invite</a><button class="btn sm dc" id="login" type="button">Log in</button><button class="menu-btn" id="mb" type="button" aria-label="Menu" aria-expanded="false" aria-controls="mp"><i></i><i></i><i></i></button></div><div class="menu-pop" id="mp" hidden><div class="menu-list"><span class="glass-i"></span><a href="index.html" role="menuitem"><b>🏠</b>Home</a><a href="index.html#play" role="menuitem"><b>🎮</b>How to play</a><a href="index.html#ranks" role="menuitem"><b>🪜</b>Ranks</a><a href="leaderboards.html" role="menuitem"><b>🏆</b>Leaderboards</a><a href="players.html" role="menuitem"><b>🔎</b>Players</a><a href="changelog.html" role="menuitem"><b>📜</b>Changelogs</a><a href="index.html#rules" role="menuitem"><b>📖</b>Rules</a><a href="https://discord.com/oauth2/authorize?client_id=1524010081409306767&permissions=326417599488&integration_type=0&scope=bot+applications.commands" role="menuitem"><b>💌</b>Invite Shiya-san</a></div></div></header>
 <main class="wrap"><div class="hero"><div>
 <h1>Spot the lie. Find the cup.</h1>
 <p class="lead">Shiya-san brings Truth or Lie and the Cup Game to your Discord server. Play friendly rooms for ChuPoints, or climb the ranked ladder against players from other servers.</p>
@@ -39,16 +37,10 @@
 <dl class="facts"><div><dt>Protection</dt><dd>Every rank-up gives a protection point (hold up to 3). One absorbs a lost star.</dd></div>
 <div><dt>Seasons</dt><dd>Each season lasts 120 days, then ranks reset.</dd></div></dl></section>
 
-<section id="boards"><h2>Leaderboards</h2><p class="note">Top 10 players. Tap a name to see their profile.</p>
-<div class="tabs"><button class="tab on" data-t="rank">Rank</button><button class="tab" data-t="points">ChuPoints</button><button class="tab" data-t="perf">Performance</button><button class="tab" data-t="score">Ranked score</button></div>
-<ol class="lb" id="lb"><li class="muted">Loading…</li></ol></section>
-<section id="players"><h2>Find a player</h2>
-<form class="find" id="find"><input id="q" type="search" placeholder="Player name or ID" autocomplete="off" aria-label="Player name or ID"><button class="btn" type="submit">Search</button></form>
-<div id="res" class="plist" aria-live="polite"></div></section>
+<section id="explore"><h2>Explore</h2><div class="tiles"><a class="tile" href="leaderboards.html"><b>🏆</b><span>Leaderboards</span><small>Top 10 players</small></a><a class="tile" href="players.html"><b>🔎</b><span>Find a player</span><small>Search names and IDs</small></a><a class="tile" href="changelog.html"><b>📜</b><span>Changelogs</span><small>See what is new</small></a></div></section>
 
-<section id="changelog" class="clsec"><div class="clhead"><h2>Changelogs</h2><span class="muted" id="clmsg" aria-live="polite"></span></div>
-<form class="find clq" onsubmit="return false"><input id="clq" type="search" placeholder="Search updates, like “cup game”" autocomplete="off" aria-label="Search updates"></form>
-<div id="cl" class="clbox"><p class="muted">Loading…</p></div></section>
+
+
 
 <section id="rules"><div class="two"><div><h2>Rules</h2><ul class="rules">
 <li>Play fair. No cheating, scripts or extra accounts.</li><li>Be kind in cross-server chats. Report problems with <code>/reportmatch</code> within 6 hours of the match.</li>
@@ -57,10 +49,7 @@
 <div><h2>Bot info</h2><dl class="facts"><div><dt>Made by</dt><dd>Mitsuka (@youwillknowme_itsjustmichukadara)</dd></div>
 <div><dt>Status</dt><dd>Shown at the top of this page. Leaderboards and search refresh every few minutes.</dd></div>
 <div><dt>Needs</dt><dd>Send Messages, Embed Links, and thread permissions so it can run rooms.</dd></div></dl>
-<details><summary>Links for the Developer Portal</summary>
-<p><b>Terms of Service URL</b><span data-p="/terms.html"></span></p><p><b>Privacy Policy URL</b><span data-p="/privacy.html"></span></p>
-<p>Linked Roles and Interactions Endpoint need a server, so leave them empty.</p></details></div></div></section><section class="end"><img src="icon.png" alt="" width="96" height="96"><h2>Ready for your first round?</h2><a class="btn" href="https://discord.com/oauth2/authorize?client_id=1524010081409306767&permissions=326417599488&integration_type=0&scope=bot+applications.commands">Invite Shiya-san</a></section></main>
-<dialog id="pw" aria-label="Player info"><div class="pw"></div></dialog>
+</div></div></section><section class="end"><img src="icon.png" alt="" width="96" height="96"><h2>Ready for your first round?</h2><a class="btn" href="https://discord.com/oauth2/authorize?client_id=1524010081409306767&permissions=326417599488&integration_type=0&scope=bot+applications.commands">Invite Shiya-san</a></section></main>
 <script src="config.js"></script><script src="app.js"></script><script src="account.js"></script>
 <footer><div class="wrap"><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a>
 <span>Made by Mitsuka. Not fully human coded, so expect the odd bug.</span></div></footer></body></html>

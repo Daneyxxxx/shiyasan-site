@@ -1,4 +1,4 @@
-const $=s=>document.querySelector(s);let HOOK="";
+const $=s=>document.querySelector(s)||document.createElement("input");let HOOK="";
 document.querySelectorAll("[data-p]").forEach(e=>e.textContent=new URL(e.dataset.p.replace(/^\//,""),location.href).href);
 const C=Object.assign({statusUrl:"",widgetGuildId:"",botName:"Shiya-san"},window.SHIYA||{});
 const SAME=C.apiUrl==="same",A=SAME?"":(C.apiUrl||"").replace(/\/$/,""),ON=SAME||!!A||!!C.static;
@@ -33,7 +33,7 @@ async function find(q){q=q.trim().toLowerCase().slice(0,40);if(q.length<2)return
 if(/^\d{15,22}$/.test(q)&&window.crypto&&crypto.subtle){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(q));h=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("").slice(0,16)}
 const ex=[],pt=[];for(const x of L){const n=String(x.n).toLowerCase();if((h&&x.h===h)||q===String(x.i).toLowerCase()||q===n)ex.push(x);else if(n.includes(q))pt.push(x)}return ex.concat(pt).slice(0,8)}
 /* leaderboards: top 10, tap a name to open that player */
-async function board(t){const o=$("#lb");o.replaceChildren(el("li","muted","Loading…"));
+async function board(t){const o=$("#lb");if(!o.isConnected)return;o.replaceChildren(el("li","muted","Loading…"));
 if(!C.static){o.replaceChildren(el("li","muted",off));return}
 try{const d=await jget(C.static+"/lb-"+t+".json");o.replaceChildren(...(d.rows.length?d.rows.slice(0,10).map((r,i)=>{const li=el("li",i<3?"top":""),n=r.h?el("button","nm lk",r.name):el("span","nm",r.name);if(r.h){n.type="button";n.onclick=()=>openPlayer(r.h)}
 li.append(el("b","pos","#"+(i+1)),n,el("span","vl",r.value),el("small","sb",r.sub));return li}):[el("li","muted","No players here yet.")]))}
@@ -51,7 +51,7 @@ try{const L=await find(q);if(my!==seq)return;r.replaceChildren(...(L.length?L.ma
 catch(e){if(my===seq)r.replaceChildren(el("p","muted","Search isn’t available right now."))}}
 $("#find").onsubmit=e=>{e.preventDefault();clearTimeout(tm);search()};
 $("#q").oninput=()=>{clearTimeout(tm);tm=setTimeout(search,220)};
-$("#q").addEventListener("focus",()=>{if(C.static)players().catch(()=>{})},{once:true});search();
+$("#q").addEventListener("focus",()=>{if(C.static)players().catch(()=>{})},{once:true});if($("#q").isConnected)search();
 /* player info window */
 const dlg=$("#pw"),closePw=()=>dlg.close?dlg.close():dlg.removeAttribute("open");
 dlg.onclick=e=>{if(e.target===dlg)closePw()};
@@ -88,8 +88,17 @@ d._t=("update "+e.n+" "+e.s.map(x=>x.t+" "+x.v).join(" ")).toLowerCase();return 
 function clFilter(){const w=$("#clq").value.trim().toLowerCase().split(/\s+/).filter(Boolean);let n=0;
 CL.forEach((d,i)=>{const hit=w.every(x=>d._t.includes(x));d.hidden=!hit;if(hit){n++;d.open=w.length&&n===1&&hit}});
 $("#clmsg").textContent=w.length?(n?n+" found":"No match"):""}
-(async()=>{const o=$("#cl");if(!C.static){o.replaceChildren(el("p","muted",off));return}
+(async()=>{const o=$("#cl");if(!o.isConnected)return;if(!C.static){o.replaceChildren(el("p","muted",off));return}
 try{const d=await jget(C.static+"/changelog.json");CL=(d.entries||[]).map((e,i)=>entry(e,false));
 if(!CL.length){o.replaceChildren(el("p","muted","No updates yet."));return}CL[0].querySelector("summary").append(el("span","tag new","NEW"));o.replaceChildren(...CL);CL.forEach(x=>x.addEventListener("toggle",()=>{if(x.open)CL.forEach(y=>{if(y!==x)y.open=false})}));$("#clq").oninput=clFilter}
 catch(e){o.replaceChildren(el("p","muted","Couldn’t load the changelog. Try again soon."))}})();
 if("IntersectionObserver"in window&&!matchMedia("(prefers-reduced-motion:reduce)").matches){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});document.querySelectorAll("section").forEach(s=>{s.classList.add("rv");io.observe(s)})}
+
+/* menu */
+(()=>{const b=$("#mb"),p=$("#mp");if(!b.isConnected)return;const cur=location.pathname.split("/").pop()||"index.html",it=[...p.querySelectorAll("a")],gi=p.querySelector(".glass-i");
+it.forEach(x=>{if(x.getAttribute("href")===cur)x.setAttribute("aria-current","page")});
+const sel=()=>p.querySelector("[aria-current]")||it[0],mv=x=>{gi.style.transform="translateY("+x.offsetTop+"px)";gi.style.height=x.offsetHeight+"px"};
+const open=v=>{b.setAttribute("aria-expanded",v);b.classList.toggle("on",v);if(v){p.hidden=false;requestAnimationFrame(()=>{p.classList.add("show");mv(sel())})}else{p.classList.remove("show");setTimeout(()=>{if(!p.classList.contains("show"))p.hidden=true},280)}};
+b.onclick=e=>{e.stopPropagation();open(b.getAttribute("aria-expanded")!=="true")};
+document.addEventListener("click",e=>{if(!p.contains(e.target))open(false)});addEventListener("keydown",e=>{if(e.key==="Escape")open(false)});
+it.forEach(x=>{x.addEventListener("pointerenter",()=>mv(x));x.addEventListener("focus",()=>mv(x))});p.addEventListener("pointerleave",()=>mv(sel()))})();

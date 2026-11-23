@@ -2,7 +2,7 @@
 window.SHIYA = {
   widgetGuildId: "1494231666544082966",   // your Discord server ID
   apiUrl: "",                             // not used: the bot puts its data in the data/ folder instead (GitHub or SFTP)
-  static: "data",                         // folder the bot writes into (relative, so it works on any address)
+  static: "https://daneyxxxx.github.io/shiyasan-site/data",   // data now read from GitHub Pages
   maxAge: 1500,                           // show Offline if the bot hasn't updated the data for this many seconds
   botName: "Shiya-san",
   // ---- Discord login (Log in button) ----

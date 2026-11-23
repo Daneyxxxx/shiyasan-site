@@ -4,8 +4,8 @@
 "use strict";
 const API="https://discord.com/api/v10",HOOK_RE=/^https:\/\/(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\//;
 const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
-const sget=k=>{try{return JSON.parse(sessionStorage.getItem(k))}catch(e){return null}},
-  sset=(k,v)=>{try{sessionStorage.setItem(k,JSON.stringify(v))}catch(e){}},sdel=k=>{try{sessionStorage.removeItem(k)}catch(e){}};
+const sget=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
+  sset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},sdel=k=>{try{localStorage.removeItem(k)}catch(e){}};
 const hex=n=>[...crypto.getRandomValues(new Uint8Array(n))].map(x=>x.toString(16).padStart(2,"0")).join("");
 const sha=async s=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)))].map(x=>x.toString(16).padStart(2,"0")).join("");
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -13,12 +13,16 @@ const anim=(e,k,o)=>(reduce||!e.animate)?{finished:Promise.resolve()}:e.animate(
 const EASE="cubic-bezier(.2,.8,.2,1)";
 let memIk="";const ik=()=>{try{let v=localStorage.getItem("shiya_ik");if(!/^[0-9a-f]{32}$/.test(v||"")){v=hex(16);localStorage.setItem("shiya_ik",v)}return v}catch(e){return memIk=memIk||hex(16)}};
 const S={auth:null,h:"",p:null,acct:null,shop:null,hook:"",fid:"",tab:"card",open:false,busy:false,q:{},draft:null,pulled:0,syncing:false,failed:false};
-const ui={},loginBtn=$("#login");
+const ui={},loginBtn=$("#login"),cur=location.pathname.split("/").pop()||"index.html";
+function welcome(a){const w=el("div","welcome"),k=el("div","w-card"),t=el("div","w-t"),v=a.av?Object.assign(el("img","w-av"),{src:"https://cdn.discordapp.com/avatars/"+a.id+"/"+a.av+".png?size=128",alt:""}):el("span","w-av","♡");
+ t.append(el("small","","Logged in ✓"),el("b","","Welcome, "+a.un+"!"));k.append(v,t);w.append(k);
+ if(!reduce)for(let i=0;i<10;i++){const h=el("span","w-h","♡");h.style.cssText="--x:"+Math.round(Math.random()*240-120)+"px;--r:"+Math.round(Math.random()*60-30)+"deg;left:"+(35+Math.random()*30)+"%;animation-delay:"+(.2+i*.12)+"s";w.append(h)}
+ w.onclick=()=>w.remove();document.body.append(w);setTimeout(()=>w.remove(),3500)}
 
 /* ---------- login (Discord implicit grant: the site never sees a password, and needs no server) ---------- */
-const redirect=()=>location.origin+location.pathname.replace(/index\.html$/,"");
+const redirect=()=>location.origin+location.pathname.replace(/[^\/]*$/,"");
 loginBtn.onclick=()=>{if(!C.clientId){alert("Login isn't set up yet: add clientId in config.js.");return}
-  const st=hex(16);sset("shiya_st",st);
+  const st=hex(16);sset("shiya_st",st);sset("shiya_back",cur);
   location.assign("https://discord.com/oauth2/authorize?"+new URLSearchParams({client_id:C.clientId,response_type:"token",redirect_uri:redirect(),scope:"identify",state:st}))};
 function takeHash(){if(!/access_token=|error=/.test(location.hash))return null;
   const q=new URLSearchParams(location.hash.slice(1));history.replaceState(null,"",location.pathname+location.search);   // token leaves the address bar at once
@@ -49,7 +53,7 @@ async function send(a,args){const n=hex(8),pl=Object.assign({v:1,k:S.fid,t:S.aut
   const fd=new FormData();fd.append("payload_json",JSON.stringify({content:"WA1|"+b,username:"Shiya Web",allowed_mentions:{parse:[]}}));
   await fetch(S.hook,{method:"POST",body:fd,mode:"no-cors"});return n}
 async function pull(){const f=S.fid;let t=null;
-  if(C.ghRepo){try{const r=await fetch("https://api.github.com/repos/"+C.ghRepo+"/contents/"+encodeURIComponent(C.static||"data")+"/ac/"+f+".json?ref="+encodeURIComponent(C.ghBranch||"main"),
+  if(C.ghRepo){try{const r=await fetch("https://api.github.com/repos/"+C.ghRepo+"/contents/"+"data"+"/ac/"+f+".json?ref="+encodeURIComponent(C.ghBranch||"main"),
     {headers:{Accept:"application/vnd.github.raw+json"},cache:"no-cache"});if(r.ok)t=await r.json();else if(r.status===404)return null}catch(e){}}
   if(!t){try{t=await jget((C.static||"data")+"/ac/"+f+".json")}catch(e){return null}}
   if(t&&typeof t==="object"&&typeof t.pts==="number"){S.pulled=Date.now();return t}return null}
@@ -147,8 +151,9 @@ function actPane(){const w=el("div","pn"),n=S.acct&&S.acct.notes||[];
 
 /* ---------- start ---------- */
 (async()=>{let a=sget("shiya_auth");const t=takeHash();
-  if(t){try{a=await loadMe(t);sset("shiya_auth",a)}catch(e){a=null}}
+  if(t){try{a=await loadMe(t);sset("shiya_auth",a);sset("shiya_welcome",1)}catch(e){a=null}}
   if(a&&a.exp<Date.now()){sdel("shiya_auth");a=null}
-  if(!a)return;S.auth=a;loginBtn.hidden=true;S.h=(await sha(a.id)).slice(0,16);build();paint();
+  if(!a)return;const bk=sget("shiya_back");sdel("shiya_back");if(t&&/^[a-z]+\.html$/.test(bk||"")&&bk!==cur){location.replace(bk);return}
+  S.auth=a;loginBtn.hidden=true;S.h=(await sha(a.id)).slice(0,16);build();paint();if(sget("shiya_welcome")){sdel("shiya_welcome");welcome(a)}
   try{S.p=await profile(S.h)||null}catch(e){S.p=null}paint();loadShop();sync()})();
 })();
