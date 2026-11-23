@@ -40,7 +40,7 @@ const clean=s=>String(s||"").split(/\s+/).filter(Boolean).join(" ");
 const nameErr=v=>v.length<2||v.length>20?"2 to 20 characters.":/[@<>`]/.test(v)||/[\u0000-\u001f]/.test(v)?"No @ < > or backticks.":"";
 const gname=()=>(S.p&&S.p.name)||(S.auth&&S.auth.un)||"Player";
 const rankTxt=()=>{const p=S.p;if(!p)return"No ranked profile yet";const n=p.lb&&p.lb[0];return p.rank+(n?" · #"+n:" · Unranked")};
-const avUrl=()=>{if(S.p&&S.p.avatar)return S.p.avatar;const a=S.auth;if(!a)return"";
+const avUrl=()=>{if(S.p&&S.p.avatar&&!/\/embed\/avatars\//.test(S.p.avatar))return S.p.avatar;const a=S.auth;if(!a)return"";
   return a.av?"https://cdn.discordapp.com/avatars/"+a.id+"/"+a.av+".png?size=128":"https://cdn.discordapp.com/embed/avatars/"+Number((BigInt(a.id)>>22n)%6n)+".png"};
 function avatar(c){const u=avUrl(),f=()=>el("span",c,gname()[0].toUpperCase());if(!u)return f();
   const i=Object.assign(el("img",c),{src:u,alt:"",referrerPolicy:"no-referrer"});i.onerror=()=>i.replaceWith(f());return i}
@@ -155,5 +155,5 @@ function actPane(){const w=el("div","pn"),n=S.acct&&S.acct.notes||[];
   if(a&&a.exp<Date.now()){sdel("shiya_auth");a=null}
   if(!a)return;const bk=sget("shiya_back");sdel("shiya_back");if(t&&/^[a-z]+\.html$/.test(bk||"")&&bk!==cur){location.replace(bk);return}
   S.auth=a;loginBtn.hidden=true;S.h=(await sha(a.id)).slice(0,16);build();paint();if(sget("shiya_welcome")){sdel("shiya_welcome");welcome(a)}
-  try{S.p=await profile(S.h)||null}catch(e){S.p=null}paint();loadShop();sync()})();
+  try{S.p=await profile(S.h)||null}catch(e){S.p=null}window.SHIYA_AV={h:S.h,url:avUrl()};paint();loadShop();sync()})();
 })();
