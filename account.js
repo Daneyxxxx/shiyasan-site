@@ -115,7 +115,7 @@ let nt=0;function note(t,k){const n=ui.note;if(!n)return;clearTimeout(nt);n.text
 function paintTabs(){const unread=S.acct&&S.acct.notes&&S.acct.notes[0]&&S.acct.notes[0].ts>(sget("shiya_seen")||0)&&S.tab!=="act";
   ui.tabs.querySelectorAll(".actab").forEach(b=>{b.classList.toggle("on",b.dataset.t===S.tab);b.setAttribute("aria-selected",b.dataset.t===S.tab);b.classList.toggle("dot",b.dataset.t==="act"&&!!unread)})}
 function paint(){if(!ui.root)return;
-  ui.an.textContent=gname();ui.ar.textContent=rankTxt();ui.avs.replaceChildren(avatar("av"));ui.who.textContent="Signed in as "+S.auth.un;paintTabs();
+  ui.an.textContent=gname();ui.ar.textContent=rankTxt();window.SHIYA_FX&&SHIYA_FX.skin(ui.box,SHIYA_FX.lv(S.p&&S.p.rank));ui.avs.replaceChildren(avatar("av"));ui.who.textContent="Signed in as "+S.auth.un;paintTabs();
   const keep=ui.pn.firstElementChild&&ui.pn.dataset.t===S.tab?ui.pn.scrollTop:0;
   ui.pn.dataset.t=S.tab;ui.pn.replaceChildren(S.tab==="card"?cardPane():S.tab==="shop"?shopPane():actPane());ui.body.scrollTop=keep}
 const state=()=>S.syncing?"Syncing your account…":S.failed?(S.hook?"Shiya-san hasn't answered yet. The bot may be asleep.":"Account tools aren't switched on yet."):"";
@@ -155,5 +155,5 @@ function actPane(){const w=el("div","pn"),n=S.acct&&S.acct.notes||[];
   if(a&&a.exp<Date.now()){sdel("shiya_auth");a=null}
   if(!a)return;const bk=sget("shiya_back");sdel("shiya_back");if(t&&/^[a-z]+\.html$/.test(bk||"")&&bk!==cur){location.replace(bk);return}
   S.auth=a;loginBtn.hidden=true;S.h=(await sha(a.id)).slice(0,16);build();paint();if(sget("shiya_welcome")){sdel("shiya_welcome");welcome(a)}
-  try{S.p=await profile(S.h)||null}catch(e){S.p=null}window.SHIYA_AV={h:S.h,url:avUrl()};paint();loadShop();sync()})();
+  try{S.p=await profile(S.h)||null}catch(e){S.p=null}window.SHIYA_AV={h:S.h,url:avUrl()};window.SHIYA_ME=()=>({name:gname(),title:S.p&&S.p.title||"",rank:S.p&&S.p.rank||"",av:avUrl()});paint();loadShop();sync()})();
 })();

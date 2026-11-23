@@ -1,0 +1,66 @@
+/* Shiya-san fx: tip capsule, rank effects (intensity = --lv 1..10), card preview */
+@property --fa{syntax:"<angle>";inherits:false;initial-value:0deg}
+
+/* ---------- tip capsule: enters from the right sliding left, leaves sliding right ---------- */
+.tipcap{position:fixed;top:calc(72px + env(safe-area-inset-top,0px));right:12px;z-index:40;display:flex;align-items:center;gap:10px;max-width:min(330px,calc(100vw - 24px));padding:9px 16px 9px 10px;border-radius:999px;background:var(--board2);border:2px dashed #5b7268;color:var(--chalk);box-shadow:0 10px 30px #0008;cursor:pointer;overflow:hidden;
+ transform:translateX(calc(100% + 28px));opacity:0;visibility:hidden;transition:transform .55s cubic-bezier(.5,0,.75,.35),opacity .4s ease .1s,visibility 0s .6s}
+.tipcap.on{transform:none;opacity:1;visibility:visible;transition:transform .8s cubic-bezier(.16,1,.3,1),opacity .35s ease,visibility 0s}
+.tipcap .e{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#0e1815;border:2px solid var(--pink);font-size:18px}
+.tipcap.on .e{animation:fxwig .9s ease .5s}
+.tipcap .tt{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.tipcap b{font-size:12px;color:var(--pink);font-weight:700}
+.tipcap span.t{font-size:13.5px;color:var(--chalk)}
+.tipcap::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:linear-gradient(90deg,var(--pink),var(--mint));transform-origin:left;transform:scaleX(0)}
+.tipcap.on::after{animation:fxbar var(--hold,7s) linear forwards;animation-play-state:var(--ps,running)}
+@keyframes fxbar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes fxwig{0%,100%{transform:rotate(0)}25%{transform:rotate(-14deg) scale(1.12)}60%{transform:rotate(10deg)}}
+
+/* ---------- rank effect (host gets .fxk + --lv + --c, plus a .fxl layer) ---------- */
+.fxk{isolation:isolate;border-color:color-mix(in srgb,var(--c) calc(var(--lv)*7%),#4a6258);
+ box-shadow:0 14px 44px #0009,0 0 calc(var(--lv)*2.2px) calc(var(--lv)*.25px) color-mix(in srgb,var(--c) calc(20% + var(--lv)*5%),transparent);
+ animation:fxg calc(4.4s - var(--lv)*.2s) ease-in-out infinite alternate}
+.pw.fxk{animation:pop .3s cubic-bezier(.2,.9,.3,1.2),fxg calc(4.4s - var(--lv)*.2s) ease-in-out .3s infinite alternate}
+@keyframes fxg{to{box-shadow:0 14px 44px #0009,0 0 calc(var(--lv)*3.8px) calc(var(--lv)*.9px) color-mix(in srgb,var(--c) calc(28% + var(--lv)*6.5%),transparent)}}
+.fxl{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:-1}
+.fxl .s{position:absolute;left:var(--x);top:var(--y);font-size:var(--s);color:var(--c);opacity:0;text-shadow:0 0 8px var(--c);animation:fxs var(--d) ease-in-out var(--dl) infinite}
+@keyframes fxs{0%{transform:translateY(8px) scale(.5) rotate(0);opacity:0}25%{opacity:.95}100%{transform:translateY(-44px) scale(1.15) rotate(160deg);opacity:0}}
+/* 3+ shimmer sweep */
+.fx-shim>.fxl::after{content:"";position:absolute;inset:-60%;background:linear-gradient(105deg,transparent 42%,color-mix(in srgb,var(--c) calc(8% + var(--lv)*3%),transparent) 50%,transparent 58%);animation:fxsh calc(6.4s - var(--lv)*.4s) ease-in-out infinite}
+@keyframes fxsh{0%{transform:translateX(-60%)}55%,100%{transform:translateX(60%)}}
+/* 5+ travelling ring */
+.fx-ring>.fxl::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:calc(1px + var(--lv)*.25px);background:conic-gradient(from var(--fa),transparent 0 55%,var(--c),transparent);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:fxr calc(5.6s - var(--lv)*.4s) linear infinite}
+@keyframes fxr{to{--fa:360deg}}
+/* 10 rainbow */
+.fx-max>.fxl::before{background:conic-gradient(from var(--fa),#ff9ad5,#ffd479,#8fe3b8,#9fe0ff,#d6a8ff,#ff9ad5)}
+
+/* tap burst */
+.fxb{position:absolute;z-index:3;pointer-events:none;font-size:var(--s);color:var(--c);text-shadow:0 0 10px var(--c);animation:fxbo var(--d) cubic-bezier(.1,.7,.3,1) forwards}
+@keyframes fxbo{from{transform:translate(-50%,-50%) scale(.4);opacity:1}to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(var(--r)) scale(1.1);opacity:0}}
+
+/* ---------- "what would my card look like" preview ---------- */
+dialog.fxpv{border:0;padding:0;background:none;color:var(--chalk);width:min(400px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:visible;margin:auto;text-align:center}
+dialog.fxpv::backdrop{background:#050b09e0;backdrop-filter:blur(4px)}
+dialog.fxpv[open]::backdrop{animation:fxbd .45s ease both}
+@keyframes fxbd{from{opacity:0}}
+.fxpv-t{margin:0 0 16px;font:26px/1.15 "Bagel Fat One",Figtree,sans-serif;color:var(--chalk);animation:fxup .6s cubic-bezier(.16,1,.3,1) .1s backwards}
+.fxpv-card{position:relative;padding:24px 20px 20px;border-radius:26px;background:var(--board2);border:3px dashed #5b7268;text-align:left;cursor:pointer;animation:fxpop .8s cubic-bezier(.2,1.25,.3,1) backwards}
+.pw.fxk{border-radius:24px}
+.fxpv-card.fxk{animation:fxpop .8s cubic-bezier(.2,1.25,.3,1) backwards,fxg calc(4.4s - var(--lv)*.2s) ease-in-out .8s infinite alternate}
+.fxpv-card.fxk>.fxl{animation:fxcharge 1.1s ease-out .25s backwards}
+@keyframes fxpop{from{opacity:0;transform:translateY(40px) rotateX(-22deg) scale(.82)}}
+@keyframes fxcharge{from{opacity:0}}
+@keyframes fxup{from{opacity:0;transform:translateY(14px)}}
+.fxpv-h{display:flex;gap:14px;align-items:center}
+.fxpv-h h3{margin:0 0 6px;font:26px/1.1 "Bagel Fat One",Figtree,sans-serif;overflow-wrap:anywhere}
+.fxpv-h .tags{display:flex;flex-wrap:wrap;gap:6px}
+.fxpv-m{display:flex;align-items:center;gap:3px;margin:16px 0 0;flex-wrap:wrap}.fxpv-m small{flex-basis:100%;color:var(--dim);margin-bottom:2px}
+.fxpv-m i{font-style:normal;font-size:17px;color:#5b7268;animation:fxhp .45s cubic-bezier(.2,1.6,.4,1) backwards;animation-delay:calc(.7s + var(--k)*.08s)}
+.fxpv-m i.on{color:var(--c);text-shadow:0 0 10px var(--c)}
+@keyframes fxhp{from{opacity:0;transform:scale(.2)}}
+.fxpv-n{margin:14px 0 0;color:var(--dim);font-size:13px;animation:fxup .5s ease 1.1s backwards}
+.fxpv-x{display:flex;gap:8px;justify-content:center;margin-top:16px;animation:fxup .5s ease 1.2s backwards}
+dialog.fxpv.out .fxpv-card,dialog.fxpv.out .fxpv-t{animation:fxout .25s ease forwards}
+dialog.fxpv.out::backdrop{animation:fxbd .25s ease reverse forwards}
+@keyframes fxout{to{opacity:0;transform:translateY(16px) scale(.94)}}
+@media(max-width:480px){.fxpv-t{font-size:22px}.fxpv-h h3{font-size:22px}.tipcap{top:calc(66px + env(safe-area-inset-top,0px))}}
+@media(prefers-reduced-motion:reduce){.tipcap,.tipcap.on{transition:none!important}.tipcap.on::after{animation:none!important}}

@@ -56,9 +56,9 @@ $("#q").addEventListener("focus",()=>{if(C.static)players().catch(()=>{})},{once
 const dlg=$("#pw"),closePw=()=>dlg.close?dlg.close():dlg.removeAttribute("open");
 dlg.onclick=e=>{if(e.target===dlg)closePw()};
 const closeBtn=()=>{const b=el("button","x","✕");b.type="button";b.setAttribute("aria-label","Close");b.onclick=closePw;return b};
-async function openPlayer(h){const box=dlg.firstElementChild;box.replaceChildren(closeBtn(),el("p","muted","Loading…"));
+async function openPlayer(h){const box=dlg.firstElementChild;window.SHIYA_FX&&SHIYA_FX.clear(box);box.replaceChildren(closeBtn(),el("p","muted","Loading…"));
 if(!dlg.open)dlg.showModal?dlg.showModal():dlg.setAttribute("open","");
-try{const p=await profile(h);if(!p)throw 0;fill(box,p,h)}catch(e){box.replaceChildren(closeBtn(),el("p","muted","Couldn’t load this player. Try again soon."))}}
+try{const p=await profile(h);if(!p)throw 0;fill(box,p,h);window.SHIYA_FX&&SHIYA_FX.skin(box,SHIYA_FX.lv(p.rank))}catch(e){box.replaceChildren(closeBtn(),el("p","muted","Couldn’t load this player. Try again soon."))}}
 const stat=(k,v)=>{const d=el("div");d.append(el("dt","",k),el("dd","",String(v)));return d};
 function fill(box,p,h){const head=el("div","pw-head"),w=el("div"),tags=el("div"),av=p.avatar?Object.assign(el("img","av"),{src:(window.SHIYA_AV&&window.SHIYA_AV.h===h&&window.SHIYA_AV.url)||p.avatar,alt:"",onerror(){this.replaceWith(el("span","av",(p.name||"?")[0].toUpperCase()))}}):el("span","av",(p.name||"?")[0].toUpperCase());
 w.append(el("h3","",p.name));if(p.title)tags.append(el("span","tag",p.title));tags.append(el("span","tag",p.rank+", "+p.stars+" stars"));w.append(tags);if(p.game_id)w.append(el("small","muted","Game ID: "+p.game_id));head.append(av,w);
