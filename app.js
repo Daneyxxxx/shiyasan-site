@@ -69,7 +69,8 @@ const kids=[closeBtn(),head,g];
 if(p.titles)kids.push(el("h4","","Rank titles"),el("p","muted",p.titles));
 if(p.badges&&p.badges.length){const b=el("div","bds");p.badges.forEach(([e,n])=>{const s=el("span","bd",e);s.title=n;b.append(s)});kids.push(el("h4","","Badges"+(p.badges_total?" ("+p.badges.length+"/"+p.badges_total+")":"")),b)}
 if(p.recent&&p.recent.length){const l=el("ul","recent");p.recent.forEach(x=>l.append(el("li",x.res.toLowerCase(),x.res+", "+x.mode+", "+x.score+(x.vs?" vs "+x.vs:"")+(x.ts?" · "+ago(x.ts):""))));kids.push(el("h4","","Recent matches"),l)}
-if(typeof p.likes==="number")kids.push(likeRow(p,h));box.replaceChildren(...kids)}
+if(typeof p.likes==="number")kids.push(likeRow(p,h));
+const rr=window.SHIYA_X&&SHIYA_X.reportRow(p,h);if(rr)kids.push(rr);box.replaceChildren(...kids)}
 /* likes: shown in the player info; the button needs the bot's like webhook (published in status.json after /cmd type:update) */
 async function sendLike(h){let v=lsGet("shiya_voter","");if(!/^[0-9a-f]{16}$/.test(v)){v=memV||[...crypto.getRandomValues(new Uint8Array(8))].map(x=>x.toString(16).padStart(2,"0")).join("");memV=v;lsSet("shiya_voter",v)}
 const fd=new FormData();fd.append("payload_json",JSON.stringify({content:"PLIKE|"+h+"|"+v,username:"Shiya Web",allowed_mentions:{parse:[]}}));await fetch(HOOK,{method:"POST",body:fd,mode:"no-cors"})}
@@ -101,4 +102,5 @@ const sel=()=>p.querySelector("[aria-current]")||it[0],mv=x=>{gi.style.transform
 const open=v=>{b.setAttribute("aria-expanded",v);b.classList.toggle("on",v);if(v){p.hidden=false;requestAnimationFrame(()=>{p.classList.add("show");mv(sel())})}else{p.classList.remove("show");setTimeout(()=>{if(!p.classList.contains("show"))p.hidden=true},280)}};
 b.onclick=e=>{e.stopPropagation();open(b.getAttribute("aria-expanded")!=="true")};
 document.addEventListener("click",e=>{if(!p.contains(e.target))open(false)});addEventListener("keydown",e=>{if(e.key==="Escape")open(false)});
-it.forEach(x=>{x.addEventListener("pointerenter",()=>mv(x));x.addEventListener("focus",()=>mv(x))});p.addEventListener("pointerleave",()=>mv(sel()))})();
+it.forEach(x=>{x.addEventListener("pointerenter",()=>mv(x));x.addEventListener("focus",()=>mv(x))});p.addEventListener("pointerleave",()=>mv(sel()));
+window.SHIYA_MENU_ADD=x=>{it.push(x);x.addEventListener("pointerenter",()=>mv(x));x.addEventListener("focus",()=>mv(x));if(x.getAttribute("href")===cur)x.setAttribute("aria-current","page")}})();

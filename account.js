@@ -13,6 +13,7 @@ const anim=(e,k,o)=>(reduce||!e.animate)?{finished:Promise.resolve()}:e.animate(
 const EASE="cubic-bezier(.2,.8,.2,1)";
 let memIk="";const ik=()=>{try{let v=localStorage.getItem("shiya_ik");if(!/^[0-9a-f]{32}$/.test(v||"")){v=hex(16);localStorage.setItem("shiya_ik",v)}return v}catch(e){return memIk=memIk||hex(16)}};
 const S={auth:null,h:"",p:null,acct:null,shop:null,hook:"",fid:"",tab:"card",open:false,busy:false,q:{},draft:null,pulled:0,syncing:false,failed:false};
+let rAuth,rSync;const READY=new Promise(r=>rAuth=r),SYNCED=new Promise(r=>rSync=r);
 const ui={},loginBtn=$("#login"),cur=location.pathname.split("/").pop()||"index.html";
 function welcome(a){const w=el("div","welcome"),k=el("div","w-card"),t=el("div","w-t"),v=a.av?Object.assign(el("img","w-av"),{src:"https://cdn.discordapp.com/avatars/"+a.id+"/"+a.av+".png?size=128",alt:""}):el("span","w-av","♡");
  t.append(el("small","","Logged in ✓"),el("b","","Welcome, "+a.un+"!"));k.append(v,t);w.append(k);
@@ -30,7 +31,7 @@ function takeHash(){if(!/access_token=|error=/.test(location.hash))return null;
   return ok?{t:q.get("access_token"),exp:Date.now()+Math.min(+q.get("expires_in")||0,604800)*1000}:null}
 async function loadMe(a){const r=await fetch(API+"/users/@me",{headers:{Authorization:"Bearer "+a.t}});if(!r.ok)throw new Error("auth");
   const u=await r.json();return{t:a.t,exp:a.exp,id:String(u.id),un:u.global_name||u.username||"Player",av:u.avatar||""}}
-function logout(){sdel("shiya_auth");sdel("shiya_seen");try{localStorage.removeItem("shiya_ik")}catch(e){}memIk="";
+function logout(){sdel("shiya_auth");sdel("shiya_seen");sdel("shiya_ok");try{localStorage.removeItem("shiya_ik")}catch(e){}memIk="";
   const done=()=>{if(ui.root)ui.root.remove();ui.scrim&&ui.scrim.remove();document.documentElement.classList.remove("acopen");document.body.classList.remove("hasacct");
     Object.keys(ui).forEach(k=>delete ui[k]);Object.assign(S,{auth:null,p:null,acct:null,open:false,tab:"card",draft:null,failed:false});loginBtn.hidden=false};
   if(ui.root){anim(ui.root,[{opacity:1,transform:"translate(-50%,0)"},{opacity:0,transform:"translate(-50%,90px)"}],{duration:300,easing:"ease-in",fill:"forwards"}).finished.then(done,done)}else done()}
@@ -50,6 +51,7 @@ const taxOf=b=>{const t=S.acct&&S.acct.tax||0;return t>0?Math.floor(b*t/100+.5):
 /* ---------- talking to the bot: a message through the bot's webhook, checked with Discord by the bot ---------- */
 async function send(a,args){const n=hex(8),pl=Object.assign({v:1,k:S.fid,t:S.auth.t,a,n,ts:Math.floor(Date.now()/1000)},args||{});
   const b=btoa(unescape(encodeURIComponent(JSON.stringify(pl)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  if(b.length>1800)throw new Error("long");   // the bot only accepts WA1 messages up to 1800 characters
   const fd=new FormData();fd.append("payload_json",JSON.stringify({content:"WA1|"+b,username:"Shiya Web",allowed_mentions:{parse:[]}}));
   await fetch(S.hook,{method:"POST",body:fd,mode:"no-cors"});return n}
 async function pull(){const f=S.fid;let t=null;
@@ -69,7 +71,7 @@ async function sync(){if(S.syncing)return;S.syncing=true;S.failed=false;paint();
   try{const d=await jget((C.static||"data")+"/status.json");S.hook=HOOK_RE.test(d.ahook||"")?d.ahook:""}catch(e){S.hook=""}
   S.fid=(await sha(ik())).slice(0,32);S.acct=await pull();
   if(!S.acct&&S.hook){try{await send("hello");for(let i=0;i<22&&!S.acct;i++){await sleep(i<6?2500:6000);S.acct=await pull()}}catch(e){}}
-  S.failed=!S.acct;S.syncing=false;paint()}
+  S.failed=!S.acct;S.syncing=false;rSync(S.acct);paint()}
 function loadShop(){jget((C.static||"data")+"/shop.json").then(d=>{S.shop=d;paint()},()=>{S.shop={items:[]}})}
 
 /* ---------- capsule ---------- */
@@ -149,11 +151,21 @@ function actPane(){const w=el("div","pn"),n=S.acct&&S.acct.notes||[];
   if(!n.length){w.append(el("p","muted","Nothing yet. Purchases and name changes show up here."));return w}
   const l=el("ul","acact");n.forEach(x=>{const li=el("li");li.append(el("span","",x.t),el("small","",ago(x.ts)));l.append(li)});w.append(l);return w}
 
+/* ---------- small API for the other pages (reports, news comments, owner dashboard) ---------- */
+async function call(a,args){for(let i=0;i<60&&!(S.hook&&S.fid);i++)await sleep(250);
+  if(!S.hook||!S.fid)throw new Error("offline");const n=await send(a,args);const r=await waitFor(n);return r||{ok:false,msg:"No answer yet. If it went through, it will show up soon."}}
+window.SHIYA_API={ready:READY,synced:SYNCED,call,hook:()=>S.hook,acct:()=>S.acct,
+  me:()=>S.auth?{id:S.auth.id,un:S.auth.un,h:S.h}:null,
+  isOwner:()=>!!(S.auth&&C.ownerId&&S.auth.id===String(C.ownerId)),
+  refresh:async()=>{const a=await pull();if(a)S.acct=a;return S.acct}};
+
 /* ---------- start ---------- */
 (async()=>{let a=sget("shiya_auth");const t=takeHash();
   if(t){try{a=await loadMe(t);sset("shiya_auth",a);sset("shiya_welcome",1)}catch(e){a=null}}
   if(a&&a.exp<Date.now()){sdel("shiya_auth");a=null}
-  if(!a)return;const bk=sget("shiya_back");sdel("shiya_back");if(t&&/^[a-z]+\.html$/.test(bk||"")&&bk!==cur){location.replace(bk);return}
-  S.auth=a;loginBtn.hidden=true;S.h=(await sha(a.id)).slice(0,16);build();paint();if(sget("shiya_welcome")){sdel("shiya_welcome");welcome(a)}
+  if(!a){rAuth(null);rSync(null);return}const bk=sget("shiya_back");sdel("shiya_back");
+  if(t&&C.ownerId&&a.id===String(C.ownerId)&&cur!=="owner.html"){location.replace("owner.html");return}   // owner just logged in: open the dashboard
+  if(t&&/^[a-z]+\.html$/.test(bk||"")&&bk!==cur){location.replace(bk);return}
+  S.auth=a;loginBtn.hidden=true;S.h=(await sha(a.id)).slice(0,16);rAuth(a);build();paint();if(sget("shiya_welcome")){sdel("shiya_welcome");welcome(a)}
   try{S.p=await profile(S.h)||null}catch(e){S.p=null}window.SHIYA_AV={h:S.h,url:avUrl()};window.SHIYA_ME=()=>({name:gname(),title:S.p&&S.p.title||"",rank:S.p&&S.p.rank||"",av:avUrl()});paint();loadShop();sync()})();
 })();

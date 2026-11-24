@@ -48,9 +48,12 @@ const TIPS=[["🛡️","Every rank-up earns a protection point. You can hold up 
 function tips(){if(document.querySelector(".tipcap"))return;let i=Math.floor(rnd(0,TIPS.length)),tm=0,hold=7000;
  const c=mk("div","tipcap"),e=mk("span","e"),tt=mk("span","tt"),lab=mk("b","","Cute trivia"),tx=mk("span","t");c.setAttribute("role","status");c.setAttribute("aria-live","polite");c.title="Tap to hide";
  tt.append(lab,tx);c.append(e,tt);document.body.append(c);
+ try{const u=(window.SHIYA||{}).static;if(u)fetch(u+"/tips.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{   // tips written in the Owner Dashboard (Tip Maker)
+  const a=d&&Array.isArray(d.tips)?d.tips.slice(0,50).filter(x=>x&&typeof x.t==="string").map(x=>[String(x.e||"💌").slice(0,8),x.t.slice(0,160),"Tip from the owner"]):[];
+  if(a.length){TIPS.unshift(...a);i=0}}).catch(()=>{})}catch(e){}
  const hide=()=>{clearTimeout(tm);c.classList.remove("on");tm=setTimeout(show,32000)};
  const show=()=>{clearTimeout(tm);if(document.hidden||document.querySelector("dialog[open]")||document.documentElement.classList.contains("acopen")){tm=setTimeout(show,5000);return}
-  const t=TIPS[i++%TIPS.length];e.textContent=t[0];tx.textContent=t[1];c.style.setProperty("--hold",hold+"ms");c.classList.remove("on");void c.offsetWidth;c.classList.add("on");tm=setTimeout(hide,hold)};
+  const t=TIPS[i++%TIPS.length];lab.textContent=t[2]||"Cute trivia";e.textContent=t[0];tx.textContent=t[1];c.style.setProperty("--hold",hold+"ms");c.classList.remove("on");void c.offsetWidth;c.classList.add("on");tm=setTimeout(hide,hold)};
  c.onclick=hide;c.addEventListener("mouseenter",()=>{if(c.classList.contains("on")){clearTimeout(tm);c.style.setProperty("--ps","paused")}});
  c.addEventListener("mouseleave",()=>{c.style.setProperty("--ps","running");if(c.classList.contains("on")){clearTimeout(tm);tm=setTimeout(hide,2500)}});
  tm=setTimeout(show,2200)}
