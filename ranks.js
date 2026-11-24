@@ -27,6 +27,8 @@ if(lv>=8&&!RM)for(let k=0;k<lv-6;k++){const o=$("span","orb"+(k%2?" h":""));o.st
 const tx=$("div","rk-tx");tx.append($("h2","rk-nm",r.n),$("p","rk-ds",r.d));
 const ch=$("div","rk-ch");if(r.div)["I","II","III","IV","V"].forEach(v=>ch.append($("span","",v)));if(r.tag)ch.append($("span","tg",r.tag));tx.append(ch);
 const mt=$("div","rk-mt");mt.append($("small","","Sparkle power"));for(let k=0;k<10;k++){const h=$("i",k<lv?"on":"",k<lv?"♥":"♡");h.style.setProperty("--k",k);mt.append(h)}tx.append(mt);
+const bd=$("div","rk-bd"),pic=$("span","av",r.e),bt=$("div");bt.append($("small","","Profile border"),$("b","",(window.SHIYA_FX&&SHIYA_FX.bn[i])||"Border"));
+bd.append(window.SHIYA_FX?SHIYA_FX.ring(pic,lv):pic,bt);tx.append(bd);
 li.append(bg,ic,tx);if(lv===10)li.append($("span","top-b","Top rank"));
 li.addEventListener("click",e=>{const r=li.getBoundingClientRect();let x=e.clientX-r.left,y=e.clientY-r.top;
 if(!e.detail){const b=ic.getBoundingClientRect();x=b.left-r.left+b.width/2;y=b.top-r.top+b.height/2}burst(li,x,y,3+lv*2);setTimeout(()=>window.SHIYA_FX&&SHIYA_FX.preview(lv),360)});

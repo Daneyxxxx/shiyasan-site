@@ -17,6 +17,18 @@ function skin(h,l){if(!h)return;l=Math.max(0,Math.min(10,l|0));if(!l){clear(h);r
  if(!RM){const n=Math.round(l*1.6)+2;for(let k=0;k<n;k++){const s=mk("span","s",g[k%g.length]);
   s.style.cssText=`--x:${rnd(3,94)}%;--y:${rnd(8,90)}%;--s:${rnd(9,12+l*.8)}px;--d:${rnd(3.4,5.2)-l*.2}s;--dl:${-rnd(0,5)}s`;if(l===10)s.style.color=RB[k%5];L.append(s)}}
  h.append(L)}
+/* ---------- animated profile picture border: more rings, glow, speed, orbiters and sparkles as the rank goes up (level 1..10) ---------- */
+const BN=["Sprout Ring","Hatchling Glow","Puzzle Pulse","Spark Arc","Target Lock","Blossom Orbit","Butterfly Halo","Mystic Orbit","Stardust Aurora","Crown Prism"];
+function ring(node,l){l=Math.max(0,Math.min(10,l|0));if(!node||!l)return node;
+ const w=mk("span","avr"),g=G(l);w.style.setProperty("--lv",l);w.style.setProperty("--c",R[l-1][2]);w.dataset.lv=l;
+ [[3,"g3"],[5,"g5"],[7,"g7"],[9,"g9"],[10,"g10"]].forEach(([n,k])=>{if(l>=n)w.classList.add(k)});
+ w.append(mk("span","avr-f"),mk("span","avr-r"));if(l>=5)w.append(mk("span","avr-r2"));
+ if(!RM){
+  if(l>=7){const n=l-5,o=mk("span","avr-o"),h=["✦","♡","✧","★","💗"];o.style.setProperty("--n",n);
+   for(let k=0;k<n;k++){const i=mk("i");i.dataset.g=h[k%h.length];i.style.setProperty("--k",k);o.append(i)}w.append(o)}
+  if(l>=9){const t=mk("span","avr-t"),n=l===10?8:5;
+   for(let k=0;k<n;k++){const a=k/n*6.283+rnd(-.3,.3),i=mk("i","",g[k%g.length]);i.style.cssText=`--x:${50+58*Math.cos(a)}%;--y:${50+58*Math.sin(a)}%;--d:${rnd(1.6,2.8)}s;--dl:${-rnd(0,3)}s`;if(l===10)i.style.color=RB[k%5];t.append(i)}w.append(t)}}
+ w.append(node);if(l===10)w.append(mk("span","avr-k","👑"));return w}
 function burst(h,x,y,n){if(RM)return;const l=+h.dataset.fx||1,g=G(l);for(let k=0;k<n;k++){const p=mk("span","fxb",g[k%g.length]),a=rnd(0,6.283),d=rnd(40,80+l*14);
  p.style.cssText=`left:${x}px;top:${y}px;--s:${rnd(11,17+l)}px;--d:${rnd(.8,1.4)}s;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-24}px;--r:${rnd(-220,220)}deg`;
  if(l===10)p.style.color=RB[k%5];p.onanimationend=()=>p.remove();h.append(p)}}
@@ -28,7 +40,7 @@ function preview(l){l=Math.max(1,Math.min(10,l|0));if(pvBusy||!l)return;pvBusy=t
  d.setAttribute("aria-label","Card preview for "+r[0]);
  const nm=me&&me.name||"Your name";
  let av;if(me&&me.av){av=mk("img","av big");av.src=me.av;av.alt="";av.onerror=()=>av.replaceWith(mk("span","av big",nm[0].toUpperCase()))}else av=mk("span","av big",me?nm[0].toUpperCase():"✦");
- w.append(mk("h3","",nm));if(me&&me.title)tg.append(mk("span","tag",me.title));tg.append(mk("span","tag",r[1]+" "+r[0]));w.append(tg);h.append(av,w);
+ w.append(mk("h3","",nm));if(me&&me.title)tg.append(mk("span","tag",me.title));tg.append(mk("span","tag",r[1]+" "+r[0]));w.append(tg);h.append(ring(av,l),w);
  const m=mk("div","fxpv-m");m.append(mk("small","","Sparkle power "+l+"/10"));for(let k=0;k<10;k++){const i=mk("i",k<l?"on":"",k<l?"♥":"♡");i.style.setProperty("--k",k);m.append(i)}
  const n=mk("p","fxpv-n",me?(me.rank?"Your rank now: "+me.rank+". Reach "+r[0]+" to get this.":"Play a ranked match to get a rank, then this can be yours."):"Log in to see your own name and avatar here.");
  const x=mk("div","fxpv-x"),ok=mk("button","btn sm","Close");ok.type="button";x.append(ok);
@@ -57,6 +69,6 @@ function tips(){if(document.querySelector(".tipcap"))return;let i=Math.floor(rnd
  c.onclick=hide;c.addEventListener("mouseenter",()=>{if(c.classList.contains("on")){clearTimeout(tm);c.style.setProperty("--ps","paused")}});
  c.addEventListener("mouseleave",()=>{c.style.setProperty("--ps","running");if(c.classList.contains("on")){clearTimeout(tm);tm=setTimeout(hide,2500)}});
  tm=setTimeout(show,2200)}
-window.SHIYA_FX={lv,skin,clear,burst,preview,ranks:R};
+window.SHIYA_FX={lv,skin,clear,burst,preview,ranks:R,ring,bn:BN};
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",tips);else tips();
 })();

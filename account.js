@@ -117,7 +117,7 @@ let nt=0;function note(t,k){const n=ui.note;if(!n)return;clearTimeout(nt);n.text
 function paintTabs(){const unread=S.acct&&S.acct.notes&&S.acct.notes[0]&&S.acct.notes[0].ts>(sget("shiya_seen")||0)&&S.tab!=="act";
   ui.tabs.querySelectorAll(".actab").forEach(b=>{b.classList.toggle("on",b.dataset.t===S.tab);b.setAttribute("aria-selected",b.dataset.t===S.tab);b.classList.toggle("dot",b.dataset.t==="act"&&!!unread)})}
 function paint(){if(!ui.root)return;
-  ui.an.textContent=gname();ui.ar.textContent=rankTxt();window.SHIYA_FX&&SHIYA_FX.skin(ui.box,SHIYA_FX.lv(S.p&&S.p.rank));ui.avs.replaceChildren(avatar("av"));ui.who.textContent="Signed in as "+S.auth.un;paintTabs();
+  ui.an.textContent=gname();ui.ar.textContent=rankTxt();window.SHIYA_FX&&SHIYA_FX.skin(ui.box,SHIYA_FX.lv(S.p&&S.p.rank));ui.avs.replaceChildren(((a)=>window.SHIYA_FX?SHIYA_FX.ring(a,SHIYA_FX.lv(S.p&&S.p.rank)):a)(avatar("av")));ui.who.textContent="Signed in as "+S.auth.un;paintTabs();
   const keep=ui.pn.firstElementChild&&ui.pn.dataset.t===S.tab?ui.pn.scrollTop:0;
   ui.pn.dataset.t=S.tab;ui.pn.replaceChildren(S.tab==="card"?cardPane():S.tab==="shop"?shopPane():actPane());ui.body.scrollTop=keep}
 const state=()=>S.syncing?"Syncing your account…":S.failed?(S.hook?"Shiya-san hasn't answered yet. The bot may be asleep.":"Account tools aren't switched on yet."):"";

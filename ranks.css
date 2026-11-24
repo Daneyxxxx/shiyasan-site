@@ -55,3 +55,9 @@
 .rk-end{display:grid;gap:22px;margin:10px 0 60px}.rk-end .cta{margin:0}
 @media(max-width:420px){.rl{padding-left:30px}.rl::before{left:11px}.rk::before{left:-26px}.rk{padding:14px 12px}}
 @media(prefers-reduced-motion:reduce){.rk,.rk *,.rk *::before,.rk *::after,.tw,.rk-bgp i{animation:none!important}}
+
+/* each rank's profile border sample */
+.rk-bd{display:flex;align-items:center;gap:14px;margin-top:14px}
+.rk-bd .av{width:46px;height:46px;background:#0e1815;font-size:24px}
+.rk-bd small{display:block;color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.rk-bd b{font:400 18px "Bagel Fat One",Figtree,sans-serif;color:var(--c);text-shadow:0 0 10px color-mix(in srgb,var(--c) 45%,transparent)}

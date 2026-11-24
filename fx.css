@@ -64,3 +64,29 @@ dialog.fxpv.out::backdrop{animation:fxbd .25s ease reverse forwards}
 @keyframes fxout{to{opacity:0;transform:translateY(16px) scale(.94)}}
 @media(max-width:480px){.fxpv-t{font-size:22px}.fxpv-h h3{font-size:22px}.tipcap{top:calc(66px + env(safe-area-inset-top,0px))}}
 @media(prefers-reduced-motion:reduce){.tipcap,.tipcap.on{transition:none!important}.tipcap.on::after{animation:none!important}}
+
+/* ---------- animated profile picture border (rank power 1-10): thicker, brighter, faster, more orbiters as the rank rises ---------- */
+.avr{--sc:1;--th:calc((2px + var(--lv)*.45px)*var(--sc));--pad:calc(var(--th) + 3px*var(--sc));--sp:calc(10s - var(--lv)*.8s);position:relative;display:inline-grid;place-items:center;flex:none;padding:var(--pad);border-radius:50%;isolation:isolate;vertical-align:middle}
+.avr>span{position:absolute;pointer-events:none;border-radius:50%}
+.avr .av{position:relative;z-index:1;border-color:var(--c)}
+.avr-f{inset:calc(var(--th)*.5);z-index:-1;box-shadow:0 0 calc(var(--lv)*2.6px*var(--sc)) calc(var(--lv)*.5px*var(--sc)) var(--c);opacity:.5;animation:avpulse calc(3.4s - var(--lv)*.18s) ease-in-out infinite}
+.avr-r{inset:0;background:var(--c);-webkit-mask:radial-gradient(farthest-side,#0000 calc(100% - var(--th)),#000 calc(100% - var(--th) + .5px));mask:radial-gradient(farthest-side,#0000 calc(100% - var(--th)),#000 calc(100% - var(--th) + .5px))}
+.g3 .avr-r{background:conic-gradient(var(--c),#fff0 18%,var(--c) 45%,#fff0 62%,var(--c));animation:avspin var(--sp) linear infinite}
+.avr-r2{inset:calc(var(--th)*-1 - 4px*var(--sc));background:repeating-conic-gradient(var(--c) 0 6deg,#0000 6deg 15deg);-webkit-mask:radial-gradient(farthest-side,#0000 calc(100% - 2px),#000 calc(100% - 1.5px));mask:radial-gradient(farthest-side,#0000 calc(100% - 2px),#000 calc(100% - 1.5px));opacity:.8;animation:avspin calc(var(--sp)*1.7) linear infinite reverse}
+.avr-o{inset:0;z-index:2}
+.avr-o i{position:absolute;inset:0;font-style:normal;animation:avspin calc(var(--sp)*1.3) linear infinite;animation-delay:calc(var(--k)*-1*var(--sp)*1.3/var(--n))}
+.avr-o i::before{content:attr(data-g);position:absolute;left:50%;top:0;transform:translate(-50%,-50%);font-size:calc(9px + var(--lv)*.55px);color:var(--c);text-shadow:0 0 6px var(--c)}
+.avr-t{inset:0;z-index:2}
+.avr-t i{position:absolute;left:var(--x);top:var(--y);font-style:normal;font-size:11px;color:var(--c);text-shadow:0 0 6px currentColor;transform:translate(-50%,-50%) scale(0);animation:avtwk var(--d) ease-in-out infinite;animation-delay:var(--dl)}
+.avr-k{left:50%;top:0;transform:translate(-50%,-72%);z-index:3;font-size:calc(var(--th)*3.4 + 8px);filter:drop-shadow(0 0 6px #ffe27a);animation:avbob 2.4s ease-in-out infinite}
+.g9 .avr-r{background:conic-gradient(var(--c),#ffd479,#fff,#ff9ad5,var(--c))}
+.g10 .avr-r{background:conic-gradient(#ff9ad5,#ffd479,#8fe3b8,#9fe0ff,#d6a8ff,#ff9ad5);animation:avspin var(--sp) linear infinite,avhue 5s linear infinite}
+.g10 .avr-f{opacity:.7;animation:avpulse 1.8s ease-in-out infinite,avhue 5s linear infinite}
+.g10 .avr-r2{background:repeating-conic-gradient(#ffd479 0 6deg,#0000 6deg 15deg);animation:avspin calc(var(--sp)*1.7) linear infinite reverse,avhue 5s linear infinite}
+.acbar .avr{--sc:.6;margin:calc(var(--pad)*-1 + 2px)}.acbar .avr-o,.acbar .avr-t,.acbar .avr-k,.acbar .avr-r2{display:none}
+@keyframes avspin{to{transform:rotate(360deg)}}
+@keyframes avpulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.8;transform:scale(1.07)}}
+@keyframes avtwk{0%,100%{transform:translate(-50%,-50%) scale(0);opacity:0}50%{transform:translate(-50%,-50%) scale(1.15) rotate(40deg);opacity:1}}
+@keyframes avbob{50%{transform:translate(-50%,-84%) rotate(5deg)}}
+@keyframes avhue{to{filter:hue-rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.avr,.avr *{animation:none!important}}
