@@ -1,3 +1,5 @@
+// Discord Activity: when Discord opens the site as an Activity, jump to the Activity screens.
+if(/[?&]frame_id=/.test(location.search)&&!/\/activity\//.test(location.pathname))location.replace("activity/"+location.search);
 // Shiya-san site settings.
 window.SHIYA = {
   widgetGuildId: "1494231666544082966",   // your Discord server ID
