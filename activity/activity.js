@@ -57,7 +57,7 @@ async function enablePresence(a){
 let pt=0;
 function setPresence(){
   if(!S.rp||!S.me)return;clearTimeout(pt);
-  pt=setTimeout(()=>{const m=S.me,what={home:"Checking their profile",hist:"Reading their game history",ranks:"Browsing the rank ladder",top:"Checking the leaderboards"}[S.tab];
+  pt=setTimeout(()=>{const m=S.me,what={home:"Checking their profile",hist:"Reading their game history",ranks:"Browsing the rank ladder",top:"Checking the leaderboards",play:"Playing live matches"}[S.tab];
     S.sdk.commands.setActivity({activity:{type:0,details:(m.rank||"Unranked")+" · ★"+(m.stars||0),state:what,timestamps:{start:S.t0}}}).catch(()=>{})},700)}
 
 /* ---------- screens ---------- */
@@ -98,7 +98,108 @@ function top(){
       b.append(el("b","",r.name||"Player"),el("small","",r.sub||""));li.append(el("span","a-pos","#"+(i+1)),b,el("span","a-vl",r.value==null?"":String(r.value)));return li}):[el("li","a-note","No players here yet.")]))
   }).catch(()=>box.replaceChildren(el("li","a-note","Couldn’t load the leaderboard. Try again soon.")));
   return w}
-const TABS=[["home","🏠","Home",home],["hist","🕘","History",history],["ranks","🏆","Ranks",ranks],["top","📊","Top",top]];
+/* ---------- live play: global chat, matchmaking and games, straight to the bot over a WebSocket (no GitHub delay) ---------- */
+const PL={ws:null,on:false,want:false,me:null,online:0,lobby:[],queue:null,qsince:0,match:null,modes:[{k:"rps",n:"Rock Paper Scissors"}],tries:0,timer:0,kicked:false,fatal:"",note:"",el:null,ui:{}};
+const RPSI={r:"✊",p:"✋",s:"✌️"},RPSN={r:"Rock",p:"Paper",s:"Scissors"};
+const plUrl=()=>IN?"wss://"+location.host+"/.proxy/live/api/live":(C.liveUrl||"");
+const plSend=o=>{if(PL.ws&&PL.ws.readyState===1){PL.ws.send(JSON.stringify(o));return true}return false};
+const plFlash=t=>{say(t,true);setTimeout(()=>say(""),3500)};
+async function plCode(){if(S.sdk){const r=await S.sdk.commands.authorize({client_id:C.clientId,response_type:"code",state:"",prompt:"none",scope:["identify","rpc.activities.write"]});return r.code}return getCode()}
+async function plConnect(){
+  if(!IN||PL.ws||PL.kicked||PL.fatal)return;
+  PL.want=true;PL.note="Connecting…";plPaint();
+  let code;try{code=await plCode()}catch(e){PL.note="Couldn’t reach Discord. Retrying…";plPaint();return plRetry()}
+  const ws=new WebSocket(plUrl());PL.ws=ws;
+  ws.onopen=()=>ws.send(JSON.stringify({t:"auth",code}));
+  ws.onmessage=ev=>{let d;try{d=JSON.parse(ev.data)}catch(e){return}plMsg(d)};
+  ws.onclose=()=>{if(PL.ws!==ws)return;PL.ws=null;PL.on=false;if(!PL.kicked&&!PL.fatal){PL.note="Connection lost. Reconnecting…";plRetry()}plPaint()};
+  ws.onerror=()=>{}}
+function plRetry(){clearTimeout(PL.timer);PL.timer=setTimeout(plConnect,Math.min(15,1+PL.tries++*2)*1000)}
+function plMsg(d){
+  const M=PL.match;
+  switch(d.t){
+  case"hello":PL.on=true;PL.tries=0;PL.note="";PL.me=d.me;PL.online=d.online||0;PL.lobby=d.lobby||[];PL.queue=d.queue||null;PL.modes=d.modes||PL.modes;if(PL.queue)PL.qsince=Date.now();
+    if(PL.ui.list){PL.ui.list.replaceChildren();PL.lobby.forEach(m=>plAdd(PL.ui.list,m))}plPaint();break;
+  case"online":PL.online=d.n||0;plStatus();break;
+  case"lobby":PL.lobby.push(d.m);if(PL.lobby.length>60)PL.lobby.shift();if(PL.ui.list)plAdd(PL.ui.list,d.m);break;
+  case"queued":PL.queue=d.mode;PL.qsince=Date.now();plPaint();break;
+  case"unqueued":PL.queue=null;plPaint();break;
+  case"match":{const g=d.game||{};PL.queue=null;
+    PL.match={id:d.id,label:d.label,opp:d.opp,cross:d.cross,to:d.to,chat:d.chat||[],score:g.score||[0,0],round:g.round||1,state:g.state||"pick",
+      end:Date.now()+(g.left||0)*1000,total:Math.max(1,g.left||25),picked:g.picked||null,oppPicked:!!g.opp_picked,gone:false,reveal:null,result:null};
+    if(S.tab!=="play")plFlash("Match found! Tap Play 🎮");plPaint();break}
+  case"round":if(!M)break;M.round=d.n;M.state="pick";M.end=Date.now()+(d.left||0)*1000;M.total=Math.max(1,d.left||25);M.picked=null;M.oppPicked=false;M.reveal=null;M.score=d.score||M.score;plGame();break;
+  case"picked":if(M){M.picked=d.v;plGame()}break;
+  case"opp_picked":if(M){M.oppPicked=true;plGame()}break;
+  case"reveal":if(M){M.state="reveal";M.reveal={you:d.you,opp:d.opp,res:d.res};M.score=d.score||M.score;plGame()}break;
+  case"opp_gone":if(M){M.gone=true;plGame()}break;
+  case"opp_back":if(M){M.gone=false;plGame()}break;
+  case"chat":if(M){M.chat.push(d.m);if(PL.ui.mlist)plAdd(PL.ui.mlist,d.m)}break;
+  case"end":if(M){M.result={res:d.res,reason:d.reason,score:d.score||M.score};M.score=M.result.score;M.state="over";plGame()}break;
+  case"kicked":PL.kicked=true;PL.note=d.m||"Opened somewhere else.";plPaint();break;
+  case"err":if(d.c==="noacct"||d.c==="banned"||d.c==="auth"&&!PL.on){PL.fatal=d.m;PL.note=d.m;plPaint()}else plFlash(d.m||"Something went wrong.");break}}
+function plAdd(list,m){
+  const li=el("li","pl-m"+(PL.me&&m.h===PL.me.h?" me":"")),meta=[m.r,m.s].filter(Boolean).join(" · ");
+  li.append(el("b","",m.n||"Player"));if(meta)li.append(el("small","",meta));li.append(el("span","",m.x));
+  const near=list.scrollHeight-list.scrollTop-list.clientHeight<60;list.append(li);
+  while(list.children.length>80)list.firstChild.remove();if(near)list.scrollTop=list.scrollHeight}
+function plBox(to){
+  const row=el("div","pl-send"),inp=el("input");inp.type="text";inp.maxLength=200;inp.placeholder=to==="match"?"Message your opponent":"Say something nice";
+  const b=el("button","pl-btn","Send");b.type="button";
+  const go=()=>{const x=inp.value.trim();if(!x)return;if(plSend({t:"chat",to,text:x}))inp.value="";else plFlash("Not connected yet.")};
+  b.onclick=go;inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();go()}};row.append(inp,b);return row}
+function plStatus(){const u=PL.ui;if(!u.dot)return;u.dot.className="a-dot"+(PL.on?" on":"");u.stt.textContent=PL.on?"Live · "+nf(PL.online)+" online":(PL.note||"Offline")}
+function plPaint(){if(!PL.el)return;plStatus();plMain()}
+function plMain(){
+  const box=PL.ui.main;box.replaceChildren();PL.ui.q=null;PL.ui.game=null;PL.ui.mlist=null;
+  if(!IN){box.append(el("h2","","Quick match"),el("p","a-note","Live play works inside Discord."));return}
+  if(PL.match)return plMatch(box);
+  box.append(el("h2","","Quick match"));
+  if(PL.queue){const p=el("p","a-sub");PL.ui.q=el("b","","0s");p.append("Searching for an opponent… ",PL.ui.q);
+    const c=el("button","pl-btn alt","Cancel");c.type="button";c.onclick=()=>plSend({t:"unqueue"});
+    box.append(p,el("p","a-note pl-hint","Players from other servers are matched first."),c);return}
+  box.append(el("p","a-sub","Pick a game. Players from other servers are matched first."));
+  const g=el("div","pl-modes");
+  PL.modes.forEach(x=>{const b=el("button","pl-mode");b.type="button";b.disabled=!PL.on;b.append(el("b","",x.n),el("small","","Live match · cross-server"));b.onclick=()=>plSend({t:"queue",mode:x.k});g.append(b)});
+  box.append(g)}
+function plMatch(box){
+  const M=PL.match,o=M.opp,top=el("div","pl-top"),who=el("div"),sc=el("div","pl-score");
+  who.append(el("b","",o.name),el("small","",[o.rank,o.server].filter(Boolean).join(" · ")));if(M.cross)who.append(el("span","a-you pl-x","Cross-server"));
+  PL.ui.score=el("b","",M.score[0]+" – "+M.score[1]);sc.append(el("small","","You"),PL.ui.score);top.append(who,sc);
+  PL.ui.game=el("div","pl-game");
+  const mlist=el("ul","a-chat");PL.ui.mlist=mlist;M.chat.forEach(m=>plAdd(mlist,m));
+  const lv=el("button","pl-btn alt",M.result?"Close":"Forfeit");PL.ui.lv=lv;lv.type="button";lv.onclick=()=>{if(PL.match&&PL.match.result){PL.match=null;plPaint()}else plSend({t:"leave"})};
+  box.append(el("h2","",M.label),top,PL.ui.game,el("p","pl-h","Chat with your opponent"),mlist,plBox("match"),el("p","pl-h"),lv);
+  plGame()}
+function plGame(){
+  const M=PL.match,g=PL.ui.game;if(!M||!g)return;g.replaceChildren();if(PL.ui.score)PL.ui.score.textContent=M.score[0]+" – "+M.score[1];
+  if(M.result){const r=M.result,why={forfeit:r.res==="win"?"They left the match.":"You left the match.",timeout:r.res==="win"?"They stopped playing.":"You ran out of time.",disconnect:"They disconnected.",abandoned:"Both players left."}[r.reason]||"";
+    const b=el("div","pl-end "+r.res);b.append(el("b","",{win:"You won! 🎉",loss:"You lost",draw:"Draw"}[r.res]||"Match over"),el("small","",r.score[0]+" – "+r.score[1]+(why?" · "+why:"")));
+    const again=el("button","pl-btn","Play again");again.type="button";again.onclick=()=>{PL.match=null;plPaint()};g.append(b,again);
+    if(PL.ui.lv)PL.ui.lv.textContent="Close";return}
+  const info=el("p","a-sub pl-info");
+  if(M.state==="reveal"&&M.reveal){const R=M.reveal;
+    info.textContent=(R.you||R.opp)?"You "+(RPSI[R.you]||"—")+"  vs  "+(RPSI[R.opp]||"—")+" · "+({win:"You win the round",loss:"They win the round",draw:"Draw, go again"}[R.res]||""):"Nobody picked. Go again."}
+  else info.textContent=M.picked?"Locked in "+RPSI[M.picked]+(M.oppPicked?"":" · waiting for them…"):(M.oppPicked?"They’ve picked. Your turn!":"Round "+M.round+" · pick one");
+  const bar=el("div","pl-bar"),fill=el("i");bar.append(fill);PL.ui.fill=fill;PL.ui.left=el("small","pl-left");
+  const row=el("div","pl-picks");
+  ["r","p","s"].forEach(k=>{const b=el("button","pl-pick"+(M.picked===k?" on":""));b.type="button";b.append(el("span","",RPSI[k]),RPSN[k]);b.disabled=M.state!=="pick"||!!M.picked;b.onclick=()=>plSend({t:"act",v:k});row.append(b)});
+  if(M.gone)g.append(el("p","a-note pl-warn","Your opponent disconnected. Waiting for them to come back…"));
+  g.append(info,bar,PL.ui.left,row);plTick()}
+function plTick(){
+  const M=PL.match;
+  if(M&&M.state==="pick"&&PL.ui.fill){const s=Math.max(0,(M.end-Date.now())/1000);PL.ui.fill.style.width=Math.min(100,s*100/M.total)+"%";if(PL.ui.left)PL.ui.left.textContent=Math.ceil(s)+"s left"}
+  else if(PL.ui.left)PL.ui.left.textContent="";
+  if(PL.queue&&PL.ui.q)PL.ui.q.textContent=Math.floor((Date.now()-PL.qsince)/1000)+"s"}
+setInterval(plTick,300);
+function plBuild(){
+  const w=el("div","a-v"),st=el("div","a-live"),dot=el("span","a-dot"),stt=el("span"),main=el("section","a-card"),chat=el("section","a-card"),list=el("ul","a-chat");
+  st.append(dot,stt);chat.append(el("h2","","🌐 Global chat"),el("p","a-sub pl-sub","Everyone in the Activity, from every server"),list,plBox("lobby"));
+  w.append(st,main,chat);PL.el=w;PL.ui={dot,stt,main,list};PL.lobby.forEach(m=>plAdd(list,m));return w}
+function play(){
+  if(!PL.el)plBuild();plPaint();plConnect();
+  setTimeout(()=>{if(PL.ui.list)PL.ui.list.scrollTop=PL.ui.list.scrollHeight},0);return PL.el}
+const TABS=[["home","🏠","Home",home],["play","🎮","Play",play],["hist","🕘","History",history],["ranks","🏆","Ranks",ranks],["top","📊","Top",top]];
 function render(){
   nav.replaceChildren(...TABS.map(([k,i,t])=>{const b=el("button",k===S.tab?"on":"");b.type="button";b.setAttribute("role","tab");b.setAttribute("aria-selected",k===S.tab);b.append(el("span","",i),t);b.onclick=()=>{S.tab=k;render();scrollTo(0,0)};return b}));
   if(!S.me){return}

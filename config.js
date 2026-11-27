@@ -16,5 +16,8 @@ window.SHIYA = {
   // This only hides the link. The bot must also check your Discord login before doing any owner action.
   ownerId: "1334911366993285121",
   // Website visit counting for the Owner Dashboard (the bot counts them).
-  trackVisits: true
+  trackVisits: true,
+  // Live play (chat, matchmaking, games) inside the Discord Activity connects through the Developer Portal URL mapping /live.
+  // Only for testing outside Discord: the bot's secure wss:// address, like "wss://your-domain/api/live".
+  liveUrl: ""
 };
