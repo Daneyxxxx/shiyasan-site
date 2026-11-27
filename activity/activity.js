@@ -105,12 +105,19 @@ const plUrl=()=>IN?"wss://"+location.host+"/.proxy/live/api/live":(C.liveUrl||""
 const plSend=o=>{if(PL.ws&&PL.ws.readyState===1){PL.ws.send(JSON.stringify(o));return true}return false};
 const plFlash=t=>{say(t,true);setTimeout(()=>say(""),3500)};
 async function plCode(){if(S.sdk){const r=await S.sdk.commands.authorize({client_id:C.clientId,response_type:"code",state:"",prompt:"none",scope:["identify","rpc.activities.write"]});return r.code}return getCode()}
+async function plToken(){      // reuse the login the Activity already did (no second Discord code needed)
+  if(S.livetok)return S.livetok;const a=S.acct;
+  if(a&&a.act&&a.act.tok&&S.ek){try{const t=(await unseal(S.ek,a.act.tok)).t;if(t){S.livetok=t;return t}}catch(e){}}
+  return ""}
 async function plConnect(){
   if(!IN||PL.ws||PL.kicked||PL.fatal)return;
   PL.want=true;PL.note="Connecting…";plPaint();
-  let code;try{code=await plCode()}catch(e){PL.note="Couldn’t reach Discord. Retrying…";plPaint();return plRetry()}
+  let tok="",code="";
+  try{tok=PL.noTok?"":await plToken();if(!tok)code=await Promise.race([plCode(),new Promise((_,j)=>setTimeout(()=>j(new Error("Discord didn’t answer")),10000))])}
+  catch(e){PL.note="Couldn’t sign in to live play ("+((e&&e.message)||e)+"). Retrying…";plPaint();return plRetry()}
+  PL.usedTok=!!tok;
   const ws=new WebSocket(plUrl());PL.ws=ws;
-  ws.onopen=()=>ws.send(JSON.stringify({t:"auth",code}));
+  ws.onopen=()=>ws.send(JSON.stringify(tok?{t:"auth",token:tok}:{t:"auth",code}));
   ws.onmessage=ev=>{let d;try{d=JSON.parse(ev.data)}catch(e){return}plMsg(d)};
   ws.onclose=()=>{if(PL.ws!==ws)return;PL.ws=null;PL.on=false;if(!PL.kicked&&!PL.fatal){PL.note="Connection lost. Reconnecting…";plRetry()}plPaint()};
   ws.onerror=()=>{}}
@@ -137,7 +144,8 @@ function plMsg(d){
   case"chat":if(M){M.chat.push(d.m);if(PL.ui.mlist)plAdd(PL.ui.mlist,d.m)}break;
   case"end":if(M){M.result={res:d.res,reason:d.reason,score:d.score||M.score};M.score=M.result.score;M.state="over";plGame()}break;
   case"kicked":PL.kicked=true;PL.note=d.m||"Opened somewhere else.";plPaint();break;
-  case"err":if(d.c==="noacct"||d.c==="banned"||d.c==="auth"&&!PL.on){PL.fatal=d.m;PL.note=d.m;plPaint()}else plFlash(d.m||"Something went wrong.");break}}
+  case"err":if(d.c==="auth"&&!PL.on&&PL.usedTok&&!PL.noTok){PL.noTok=true;S.livetok="";PL.note="Signing in again…";plPaint();if(PL.ws)PL.ws.close()}
+    else if(d.c==="noacct"||d.c==="banned"||d.c==="auth"&&!PL.on){PL.fatal=d.m;PL.note=d.m;plPaint()}else plFlash(d.m||"Something went wrong.");break}}
 function plAdd(list,m){
   const li=el("li","pl-m"+(PL.me&&m.h===PL.me.h?" me":"")),meta=[m.r,m.s].filter(Boolean).join(" · ");
   li.append(el("b","",m.n||"Player"));if(meta)li.append(el("small","",meta));li.append(el("span","",m.x));
@@ -213,7 +221,7 @@ const DEMO_LB={rows:[{name:"Mitsuka",value:"Striker ★3",sub:"61 ranked",h:"dem
 async function start(){
   if(DEMO){S.me=DEMO_ME;S.hist=[{res:"Win",mode:"Truth or Lie Ranked",score:"3-1",vs:"Pip",detail:"Best of 3",ts:Date.now()/1000-600},{res:"Loss",mode:"Cup Game Ranked",score:"1-2",vs:"Nori",ts:Date.now()/1000-7200},{res:"Draw",mode:"Truth or Lie",score:"2-2",vs:"Kai",ts:Date.now()/1000-90000}];render();return}
   if(!IN){root.replaceChildren(el("p","a-note","Open this from Discord: join a voice channel or DM and pick the Shiya-san Activity."));return}
-  try{const a=await login();S.me=a.me||{};S.hist=a.hist||[];say("");render();enablePresence(a);
+  try{const a=await login();S.acct=a;S.me=a.me||{};S.hist=a.hist||[];say("");render();enablePresence(a);
     try{const h=S.me.h;if(h){const p=(await getj(U("data/pf/"+h[0]+".json")))[h];if(p&&p.avatar){S.avatar=p.avatar;render()}}}catch(e){}}
   catch(e){fail(e)}}
 render();start();
